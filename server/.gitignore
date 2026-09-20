@@ -1,0 +1,16 @@
+# Maven 构建产物
+target/
+
+# 本地 Maven 仓库
+.m2/
+
+# IDE 配置
+.idea/
+*.iml
+
+# 日志
+logs/
+*.log
+
+# 本地私有配置
+src/main/resources/application-my.yml

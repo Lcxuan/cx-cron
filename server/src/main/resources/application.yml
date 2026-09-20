@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: cx-cron
+  profiles:
+    active: my
+
+swagger:
+  info:
+    title: cx-cron 接口文档
+    description: cx-cron 后端 API 接口文档
+    version: 1.0.0
+    author: Lcxuan
+    url: https://github.com/Lcxuan/cx-cron
+    license-url:
+
+auth:
+  token:
+    access-timeout: 7200
+    refresh-timeout: 2592000
+
+mybatis-plus:
+  mapper-locations: classpath:/mapper/**/*.xml
+  type-aliases-package: com.cxcron.**.entity
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    banner: false
+    db-config:
+      id-type: assign_id
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+mybatis-plus-join:
+  banner: false # 关闭控制台的 Banner 打印
+
+sa-token:
+  token-name: Authorization
+  token-prefix: Bearer
+  timeout: 604800 # token 有效期（单位：秒），默认 30 天，-1 代表永久
+  active-timeout: -1 # token 最低活跃频率（单位：秒），如果 token 超过此时间没有访问系统就会被冻结，默认 -1 代表不限制，永不冻结
+  is-concurrent: true # 是否允许同一账号多地同时登录，为 true 时允许一起登录，为 false 时新登录会挤掉旧登录
+  is-share: false # 在多人登录同一账号时，是否共用一个 token，为 true 时所有登录共用一个 token，为 false 时每次登录新建一个 token
+  token-style: simple-uuid # token 风格，默认可取值：uuid、simple-uuid、random-32、random-64、random-128、tik
+  is-read-cookie: false # 登录时不再往前端注入Cookie, 不再从Cookie里读取Token
+  is-log: false # 是否打印操作日志
+  is-print: false # 是否在初始化配置时打印版本字符画
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

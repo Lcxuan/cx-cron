@@ -1,0 +1,8 @@
+node_modules
+.DS_Store
+dist
+*.local
+*.tsbuildinfo
+.vscode
+hs_err_pid*.log
+.idea/
