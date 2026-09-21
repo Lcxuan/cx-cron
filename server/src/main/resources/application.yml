@@ -29,10 +29,6 @@ auth:
     access-timeout: 7200
     refresh-timeout: 2592000
 
-task:
-  script:
-    storage-path: uploads/scripts
-
 mybatis-plus:
   mapper-locations: classpath:/mapper/**/*.xml
   type-aliases-package: com.cxcron.**.entity

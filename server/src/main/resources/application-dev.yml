@@ -16,3 +16,7 @@ spring:
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+task:
+  script:
+    storage-path: uploads/scripts # 上传的文件目录，默认 uploads/scripts，支持绝对路径
