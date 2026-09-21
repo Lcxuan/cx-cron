@@ -19,6 +19,12 @@ import java.nio.charset.StandardCharsets;
 public class CachedBodyFilter extends OncePerRequestFilter {
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String contentType = request.getContentType();
+        return contentType != null && contentType.startsWith("multipart/");
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         filterChain.doFilter(new CachedBodyRequestWrapper(request), response);

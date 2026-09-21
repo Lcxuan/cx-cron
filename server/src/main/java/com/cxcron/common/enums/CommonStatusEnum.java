@@ -16,4 +16,14 @@ public enum CommonStatusEnum {
 
     private final int code;
     private final String description;
+
+    /**
+     * 判断状态是否启用。
+     *
+     * @param code 状态编码
+     * @return 是否启用
+     */
+    public static boolean isEnabled(Integer code) {
+        return Integer.valueOf(ENABLE.code).equals(code);
+    }
 }

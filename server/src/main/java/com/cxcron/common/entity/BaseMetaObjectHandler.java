@@ -1,5 +1,6 @@
 package com.cxcron.common.entity;
 
+import cn.dev33.satoken.exception.NotWebContextException;
 import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import org.apache.ibatis.reflection.MetaObject;
@@ -21,10 +22,6 @@ public class BaseMetaObjectHandler implements MetaObjectHandler {
         LocalDateTime now = LocalDateTime.now();
         strictInsertFill(metaObject, "createTime", LocalDateTime.class, now);
         strictInsertFill(metaObject, "updateTime", LocalDateTime.class, now);
-        if (StpUtil.isLogin()) {
-            strictInsertFill(metaObject, "createBy", Long.class, StpUtil.getLoginIdAsLong());
-            strictInsertFill(metaObject, "updateBy", Long.class, StpUtil.getLoginIdAsLong());
-        }
     }
 
     /**

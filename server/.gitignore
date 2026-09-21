@@ -14,3 +14,6 @@ logs/
 
 # 本地私有配置
 src/main/resources/application-my.yml
+
+# 上传的文件
+uploads/

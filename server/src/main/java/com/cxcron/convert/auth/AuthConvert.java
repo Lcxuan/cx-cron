@@ -11,6 +11,8 @@ import org.mapstruct.factory.Mappers;
 @Mapper
 public interface AuthConvert {
 
+    AuthConvert INSTANCE = Mappers.getMapper(AuthConvert.class);
+
     /**
      * 管理员实体转换为当前用户响应。
      *
@@ -18,9 +20,4 @@ public interface AuthConvert {
      * @return 当前用户响应
      */
     CurrentUserResp toCurrentUserResp(AdminUserDO user);
-
-    /**
-     * 转换器实例。
-     */
-    AuthConvert INSTANCE = Mappers.getMapper(AuthConvert.class);
 }

@@ -3,6 +3,17 @@ spring:
     name: cx-cron
   profiles:
     active: my
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: never
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceName: cxCronScheduler
+          jobStore:
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
 
 swagger:
   info:
@@ -17,6 +28,10 @@ auth:
   token:
     access-timeout: 7200
     refresh-timeout: 2592000
+
+task:
+  script:
+    storage-path: uploads/scripts
 
 mybatis-plus:
   mapper-locations: classpath:/mapper/**/*.xml

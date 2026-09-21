@@ -18,11 +18,6 @@ public class ExecutionRecordDO extends BaseDO {
     private Long scheduledTaskId;
 
     /**
-     * 任务类型。
-     */
-    private String taskType;
-
-    /**
      * 触发方式：SCHEDULED-调度，MANUAL-手动。
      */
     private String triggerType;
@@ -43,9 +38,9 @@ public class ExecutionRecordDO extends BaseDO {
     private String summary;
 
     /**
-     * XXL-JOB 执行日志 ID。
+     * Quartz 触发实例 ID。
      */
-    private Long xxlJobLogId;
+    private String quartzFireInstanceId;
 
     /**
      * 开始执行时间。

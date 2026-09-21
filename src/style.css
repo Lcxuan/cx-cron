@@ -1,0 +1,25 @@
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-width: 320px;
+  color: #1f2937;
+  background: #f5f7fa;
+  font-family: Inter, "Microsoft YaHei", sans-serif;
+}
+
+.app-layout { min-height: 100vh; }
+.app-header { display: flex; align-items: center; justify-content: space-between; background: #001529; }
+.brand { margin: 0 !important; color: #fff !important; }
+.header-actions { display: flex; align-items: center; gap: 16px; color: #fff; }
+.app-content { width: min(100% - 32px, 1100px); margin: 24px auto; }
+.app-content nav { margin-bottom: 20px; }
+.task-placeholder, .login-card { background: #fff; border-radius: 8px; padding: 24px; }
+.login-page { min-height: 100vh; display: grid; place-items: center; padding: 16px; }
+.login-card { width: min(100%, 400px); }
+
+@media (max-width: 480px) {
+  .app-header { padding: 0 16px; }
+  .app-content { width: calc(100% - 24px); margin: 12px auto; }
+  .header-actions { gap: 8px; }
+}

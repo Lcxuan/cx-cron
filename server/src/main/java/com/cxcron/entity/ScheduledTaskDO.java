@@ -7,38 +7,51 @@ import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
 
+/**
+ * 定时任务实体。
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("scheduled_tasks")
 public class ScheduledTaskDO extends BaseDO {
 
-    /**
-     * 任务类型。
+    /** 
+     * 任务名称。 
      */
-    private String taskType;
+    private String name;
 
-    /**
-     * Cron 表达式。
+    /** 
+     * Cron 表达式。 
      */
     private String cronExpression;
 
+    /** 
+     * 上传脚本的存储路径。 
+     */
+    private String scriptPath;
+
+    /** 
+     * 运行命令，使用 {script} 表示上传脚本路径。
+     */
+    private String runCommand;
+
     /**
-     * 是否启用：0-暂停，1-启用。
+     * 是否启用：1-启用，0-关闭。
      */
     private Integer enabled;
 
-    /**
-     * XXL-JOB 任务 ID。
+    /** 
+     * Quartz Job 名称。 
      */
-    private Long xxlJobId;
+    private String quartzJobName;
 
-    /**
-     * 最近调度状态。
+    /** 
+     * 最近一次调度状态。 
      */
     private String lastScheduleStatus;
 
-    /**
-     * 最近调度时间。
+    /** 
+     * 最近一次调度时间。 
      */
     private LocalDateTime lastScheduleTime;
 }
