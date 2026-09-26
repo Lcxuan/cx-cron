@@ -91,3 +91,7 @@ pnpm dev
 pnpm typecheck
 pnpm build
 ```
+
+## 许可证
+
+本项目采用 [Apache License 2.0](./LICENSE) 许可证。
