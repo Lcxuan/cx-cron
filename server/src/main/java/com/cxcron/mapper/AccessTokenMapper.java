@@ -20,6 +20,17 @@ public interface AccessTokenMapper extends BaseMapperPlus<AccessTokenDO> {
     }
 
     /**
+     * 根据访问令牌查询令牌记录。
+     *
+     * @param accessToken 访问令牌
+     * @return 令牌记录，不存在时返回 {@code null}
+     */
+    default AccessTokenDO selectByAccessToken(String accessToken) {
+        return selectOne(new LambdaQueryWrapper<AccessTokenDO>()
+                .eq(AccessTokenDO::getAccessToken, accessToken));
+    }
+
+    /**
      * 根据访问令牌删除令牌记录。
      *
      * @param accessToken 访问令牌

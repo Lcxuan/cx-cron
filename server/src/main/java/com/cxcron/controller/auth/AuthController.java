@@ -3,9 +3,11 @@ package com.cxcron.controller.auth;
 import com.cxcron.common.Result;
 import com.cxcron.controller.auth.dto.LoginReq;
 import com.cxcron.controller.auth.dto.RefreshTokenReq;
+import com.cxcron.controller.auth.dto.UpdatePasswordReq;
 import com.cxcron.controller.auth.vo.CurrentUserResp;
 import com.cxcron.controller.auth.vo.TokenResp;
 import com.cxcron.service.auth.AuthService;
+import com.cxcron.service.auth.RsaCryptoService;
 import com.cxcron.service.token.TokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final RsaCryptoService rsaCryptoService;
     private final TokenService tokenService;
 
     /**
@@ -36,6 +39,12 @@ public class AuthController {
     @PostMapping("/login")
     public Result<TokenResp> login(@Valid @RequestBody LoginReq request) {
         return Result.success(authService.login(request));
+    }
+
+    @Operation(summary = "获取登录加密公钥")
+    @GetMapping("/public-key")
+    public Result<String> publicKey() {
+        return Result.success(rsaCryptoService.getPublicKey());
     }
 
     /**
@@ -59,6 +68,13 @@ public class AuthController {
     @PostMapping("/logout")
     public Result<Void> logout() {
         tokenService.logout();
+        return Result.success();
+    }
+
+    @Operation(summary = "修改当前管理员密码")
+    @PostMapping("/password")
+    public Result<Void> updatePassword(@Valid @RequestBody UpdatePasswordReq request) {
+        authService.updatePassword(request);
         return Result.success();
     }
 

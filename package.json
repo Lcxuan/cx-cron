@@ -1,26 +1,29 @@
 {
-  "name": "cx-cron-web",
+  "name": "cx-cron-vben-monorepo",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node ./node_modules/vite/bin/vite.js",
-    "typecheck": "node ./node_modules/vue-tsc/bin/vue-tsc.js --noEmit",
-    "test": "node ./node_modules/vitest/vitest.mjs run",
-    "build": "pnpm typecheck && node ./node_modules/vite/bin/vite.js build"
-  },
-  "dependencies": {
-    "ant-design-vue": "^4.2.6",
-    "axios": "^1.8.4",
-    "pinia": "^3.0.1",
-    "vue": "^3.5.13",
-    "vue-router": "^4.5.0"
+    "dev": "pnpm --filter @vben/web-antd dev",
+    "test": "pnpm --filter @vben/web-antd test",
+    "typecheck": "pnpm --filter @vben/web-antd typecheck",
+    "build": "pnpm --filter @vben/web-antd build"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.2.3",
-    "typescript": "~5.7.2",
-    "vite": "^6.2.2",
-    "vitest": "^3.0.9",
-    "vue-tsc": "^2.2.8"
+    "@vben/tsconfig": "workspace:*",
+    "@vitejs/plugin-vue": "catalog:",
+    "@types/node": "catalog:",
+    "cross-env": "catalog:",
+    "happy-dom": "catalog:",
+    "typescript": "catalog:",
+    "tsdown": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:",
+    "vue-tsc": "catalog:"
+  },
+  "packageManager": "pnpm@11.16.0",
+  "engines": {
+    "node": ">=20.19.0",
+    "pnpm": ">=11.0.0"
   }
 }

@@ -23,9 +23,9 @@ public class LoginReq {
     private String username;
 
     /**
-     * 登录密码。
+     * RSA 加密后的登录密码。
      */
     @NotBlank(message = "密码不能为空")
-    @Schema(description = "登录密码", example = "123456", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "RSA 加密后的登录密码", requiredMode = Schema.RequiredMode.REQUIRED)
     private String password;
 }

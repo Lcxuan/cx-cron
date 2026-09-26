@@ -24,7 +24,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new SaInterceptor(handle -> StpUtil.checkLogin()))
                 .addPathPatterns("/client/**")
-                .excludePathPatterns("/client/auth/login", "/client/auth/refresh");
+                .excludePathPatterns("/client/auth/login", "/client/auth/public-key", "/client/auth/refresh");
     }
 
     /**

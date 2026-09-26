@@ -9,7 +9,7 @@ public enum BusinessErrorCodeConstants implements ErrorCode {
 
     // 认证模块
     LOGIN_FAILED("1001", "账号或密码错误"),
-    TOKEN_INVALID("1002", "令牌无效或已过期"),
+    PASSWORD_INCORRECT("1002", "当前密码错误"),
 
     // 任务模块
     TASK_NOT_FOUND("2001", "任务不存在"),

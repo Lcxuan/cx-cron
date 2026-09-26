@@ -5,8 +5,8 @@ import com.cxcron.controller.auth.vo.TokenResp;
 import com.cxcron.entity.AccessTokenDO;
 import com.cxcron.entity.RefreshTokenDO;
 import com.cxcron.enums.UserTypeEnum;
-import com.cxcron.enums.exception.BusinessErrorCodeConstants;
 import com.cxcron.enums.exception.BusinessException;
+import com.cxcron.enums.exception.GlobalErrorCodeConstants;
 import com.cxcron.mapper.AccessTokenMapper;
 import com.cxcron.mapper.RefreshTokenMapper;
 import com.cxcron.service.token.TokenService;
@@ -25,10 +25,10 @@ public class TokenServiceImpl implements TokenService {
     private final RefreshTokenMapper refreshTokenMapper;
     private final AccessTokenMapper accessTokenMapper;
 
-    @Value("${auth.token.access-timeout}")
+    @Value("${cxcron.auth.token.access-timeout}")
     private long accessTimeout;
 
-    @Value("${auth.token.refresh-timeout}")
+    @Value("${cxcron.auth.token.refresh-timeout}")
     private long refreshTimeout;
 
     @Override
@@ -61,7 +61,7 @@ public class TokenServiceImpl implements TokenService {
     public TokenResp refreshTokens(String refreshToken) {
         RefreshTokenDO token = refreshTokenMapper.selectByRefreshToken(refreshToken);
         if (token == null || token.getExpiresTime().isBefore(LocalDateTime.now())) {
-            throw new BusinessException(BusinessErrorCodeConstants.TOKEN_INVALID);
+            throw new BusinessException(GlobalErrorCodeConstants.UNAUTHORIZED);
         }
         refreshTokenMapper.deleteById(token.getId());
         accessTokenMapper.deleteByRefreshTokenId(token.getId());
@@ -71,7 +71,11 @@ public class TokenServiceImpl implements TokenService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void logout() {
-        accessTokenMapper.deleteByAccessToken(StpUtil.getTokenValue());
+        AccessTokenDO accessToken = accessTokenMapper.selectByAccessToken(StpUtil.getTokenValue());
+        if (accessToken != null) {
+            refreshTokenMapper.deleteById(accessToken.getRefreshTokenId());
+            accessTokenMapper.deleteById(accessToken.getId());
+        }
         StpUtil.logout();
     }
 }
