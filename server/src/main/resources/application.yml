@@ -19,7 +19,7 @@ swagger:
   info:
     title: cx-cron 接口文档
     description: cx-cron 后端 API 接口文档
-    version: 1.0.0
+    version: 1.1.0
     author: Lcxuan
     url: https://github.com/Lcxuan/cx-cron
     license-url:
