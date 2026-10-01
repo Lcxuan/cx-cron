@@ -1,19 +1,28 @@
+import { Empty } from 'ant-design-vue';
+import { defineComponent, h } from 'vue';
 import type { RouteRecordRaw } from 'vue-router';
 import { createRouter, createWebHashHistory } from 'vue-router';
 import { installRouterGuard } from './guard';
 
-const routes: RouteRecordRaw[] = [
+export const routes: RouteRecordRaw[] = [
   {
     path: '/',
+    name: 'Root',
     component: () => import('#/layouts/BasicLayout.vue'),
-    redirect: '/task',
-    meta: { title: '任务管理' },
+    redirect: '/empty-menu',
+    meta: { title: 'cx-cron' },
     children: [
       {
-        path: '/task',
-        name: 'TaskManagement',
-        component: () => import('#/views/task/index.vue'),
-        meta: { icon: 'lucide:list-todo', requiresAuth: true, title: '任务管理' },
+        path: '/empty-menu',
+        name: 'EmptyMenu',
+        component: defineComponent({
+          setup: () => () => h(
+            'div',
+            { style: { display: 'flex', justifyContent: 'center', paddingTop: '15vh' } },
+            [h(Empty, { description: '暂无可访问菜单。' })],
+          ),
+        }),
+        meta: { hideInMenu: true, requiresAuth: true, title: '暂无可访问菜单' },
       },
       {
         path: '/profile/password',
@@ -29,7 +38,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('#/views/auth/login/index.vue'),
     meta: { hideInMenu: true, hideInTab: true, title: '登录' },
   },
-  { path: '/:pathMatch(.*)*', redirect: '/task' },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: defineComponent({ setup: () => () => h('div', '页面不存在') }),
+    meta: { requiresAuth: true, hideInMenu: true, title: '页面不存在' },
+  },
 ];
 
 export const router = createRouter({

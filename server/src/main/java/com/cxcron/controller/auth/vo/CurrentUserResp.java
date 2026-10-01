@@ -1,5 +1,7 @@
 package com.cxcron.controller.auth.vo;
 
+import com.cxcron.controller.menu.vo.MenuRouteResp;
+import java.util.List;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,4 +31,7 @@ public class CurrentUserResp {
      */
     @Schema(description = "显示名称", example = "管理员")
     private String nickname;
+
+    @Schema(description = "菜单树")
+    private List<MenuRouteResp> menus;
 }

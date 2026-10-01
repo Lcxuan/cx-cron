@@ -143,6 +143,49 @@ COMMENT ON COLUMN execution_records.update_time IS '更新时间';
 COMMENT ON COLUMN execution_records.update_by IS '更新人 ID';
 COMMENT ON COLUMN execution_records.deleted IS '逻辑删除标记：0-未删除，1-已删除';
 
+CREATE TABLE system_menus (
+    id bigint NOT NULL,
+    parent_id bigint NOT NULL DEFAULT 0,
+    name varchar(100) NOT NULL,
+    path varchar(200) NOT NULL,
+    component varchar(200),
+    component_name varchar(100),
+    type varchar(20) NOT NULL,
+    icon varchar(100),
+    sort integer NOT NULL DEFAULT 0,
+    enabled smallint NOT NULL DEFAULT 1,
+    visible smallint NOT NULL DEFAULT 0,
+    keep_alive smallint NOT NULL DEFAULT 0,
+    always_show smallint NOT NULL DEFAULT 0,
+    create_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    create_by bigint,
+    update_time timestamp,
+    update_by bigint,
+    deleted smallint NOT NULL DEFAULT 0,
+    CONSTRAINT pk_system_menus PRIMARY KEY (id)
+);
+COMMENT ON TABLE system_menus IS '系统菜单表';
+COMMENT ON COLUMN system_menus.id IS '菜单 ID';
+COMMENT ON COLUMN system_menus.parent_id IS '父菜单 ID，0 表示顶级';
+COMMENT ON COLUMN system_menus.name IS '菜单名称';
+COMMENT ON COLUMN system_menus.path IS '路由路径';
+COMMENT ON COLUMN system_menus.component IS '页面路径，相对 src/views 且不含扩展名';
+COMMENT ON COLUMN system_menus.component_name IS '页面路由名称';
+COMMENT ON COLUMN system_menus.type IS '菜单类型：DIRECTORY、MENU';
+COMMENT ON COLUMN system_menus.icon IS '菜单图标';
+COMMENT ON COLUMN system_menus.sort IS '显示顺序，数值越小越靠前';
+COMMENT ON COLUMN system_menus.enabled IS '是否启用：0-否，1-是';
+COMMENT ON COLUMN system_menus.visible IS '是否隐藏侧栏：0-否，1-是';
+COMMENT ON COLUMN system_menus.keep_alive IS '是否缓存：0-否，1-是';
+COMMENT ON COLUMN system_menus.always_show IS '是否始终显示父级：0-否，1-是';
+COMMENT ON COLUMN system_menus.create_time IS '创建时间';
+COMMENT ON COLUMN system_menus.create_by IS '创建人 ID';
+COMMENT ON COLUMN system_menus.update_time IS '更新时间';
+COMMENT ON COLUMN system_menus.update_by IS '更新人 ID';
+COMMENT ON COLUMN system_menus.deleted IS '逻辑删除标记：0-未删除，1-已删除';
+
+INSERT INTO system_menus (id, parent_id, name, path, component, component_name, type, icon, sort, enabled, visible, keep_alive, always_show) VALUES (1, 0, '任务管理', '/task', 'task/index', 'Task', 'MENU', 'lucide:list-todo', 1, 1, 0, 0, 0);
+
 CREATE TABLE qrtz_job_details (
     sched_name varchar(120) NOT NULL,
     job_name varchar(200) NOT NULL,

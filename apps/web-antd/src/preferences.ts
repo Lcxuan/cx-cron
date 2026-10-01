@@ -2,7 +2,7 @@ import { defineOverridesPreferences } from '@vben/preferences';
 
 export const overridesPreferences = defineOverridesPreferences({
   app: {
-    defaultHomePath: '/task',
+    accessMode: 'backend',
     name: 'cx-cron',
   },
   logo: {
