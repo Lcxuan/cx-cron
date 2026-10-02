@@ -7,7 +7,7 @@
 
   <groupId>com.cxcron</groupId>
   <artifactId>server</artifactId>
-  <version>1.1.0</version>
+  <version>1.2.0</version>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -46,6 +46,10 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-mail</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>

@@ -57,35 +57,50 @@ cx-cron/
 
 ## 本地运行
 
-### 1. 配置后端
+### 1. 配置并启动后端
 
-复制 [application-dev.yml](./server/src/main/resources/application-dev.yml) 为`application-my.yml`，配置 PostgreSQL、Redis 和 RSA 私钥所需的环境变量，RSA 私钥可通过[RsaKeyGeneratorTest.java](./server/src/test/java/com/cxcron/service/auth/RsaKeyGeneratorTest.java) 生成：
+#### 1.1. 创建本地配置文件
 
-```bash
-${POSTGRES_PASSWORD} 替换为 PostgreSQL 密码
-${REDIS_PASSWORD} 替换为本地 Redis 密码，无密码需要注释
-${AUTH_RSA_PRIVATE_KEY} 替换为PKCS#8 格式 RSA 私钥
-```
+将 [application-dev.yml](./server/src/main/resources/application-dev.yml) 复制为 `application-my.yml`，再根据本机环境修改数据库、Redis 和密钥配置。
 
-启动后端：
+#### 1.2. 配置 PostgreSQL 和 Redis
+
+在 `application-my.yml` 中填写 PostgreSQL 和 Redis 的连接信息，并配置对应密码：
+
+- `${POSTGRES_PASSWORD}`：PostgreSQL 密码。
+- `${REDIS_PASSWORD}`：Redis 密码；如果 Redis 未设置密码，注释即可。
+
+#### 1.3. 配置 RSA 私钥
+
+认证功能需要 PKCS#8 格式的 RSA 私钥。可运行 [RsaKeyGeneratorTest.java](./server/src/test/java/com/cxcron/service/auth/RsaKeyGeneratorTest.java) 生成密钥，并将私钥配置到 `${AUTH_RSA_PRIVATE_KEY}`。
+
+#### 1.4. 配置邮件加密密钥
+
+邮件配置中的 SMTP 密码使用该密钥加密。可运行 [EmailEncryptionKeyGeneratorTest.java](./server/src/test/java/com/cxcron/service/email/EmailEncryptionKeyGeneratorTest.java) 生成密钥，并将其配置到 `${CX_CRON_EMAIL_ENCRYPTIONKEY}`。
+
+#### 1.5. 启动后端
+
+在项目根目录执行：
 
 ```bash
 cd server
-mvn spring-boot:run -Dspring-boot.run.profiles=dev
+mvn spring-boot:run -Dspring-boot.run.profiles=my
 ```
 
-默认监听 `http://localhost:8080`。
+后端默认监听 `http://localhost:8080`。
 
-### 2. 启动前端
+### 2. 配置并启动前端
 
-前端开发代理和接口前缀配置位于 [apps/web-antd/.env.development](./apps/web-antd/.env.development)。默认代理目标为 `http://localhost:8080`，请按实际后端地址调整。
+前端开发代理和接口前缀配置位于 [apps/web-antd/.env.development](./apps/web-antd/.env.development)。默认代理目标为 `http://localhost:8080`；如果后端地址不同，请先调整代理配置。
+
+在项目根目录安装依赖并启动前端：
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-执行类型检查和生产构建：
+运行前端类型检查和生产构建：
 
 ```bash
 pnpm typecheck

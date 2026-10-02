@@ -41,6 +41,11 @@ public class ScheduledTaskDO extends BaseDO {
     private Integer enabled;
 
     /** 
+     * 邮件通知策略：OFF 不通知，FAILURE 任务失败时通知，ALL 任务执行完成后通知。
+     */
+    private String emailNotificationPolicy;
+
+    /** 
      * Quartz Job 名称。 
      */
     private String quartzJobName;

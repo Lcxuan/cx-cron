@@ -28,8 +28,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class ScheduledTaskServiceImpl implements ScheduledTaskService {
 
     private final ScheduledTaskMapper scheduledTaskMapper;
+
     private final ExecutionRecordMapper executionRecordMapper;
+
     private final QuartzTaskService quartzTaskService;
+    
     private final ScriptStorage scriptStorage;
 
     @Override
@@ -37,6 +40,7 @@ public class ScheduledTaskServiceImpl implements ScheduledTaskService {
     public Long create(TaskCreateReq request) {
         validateCron(request.getCronExpression());
         ScheduledTaskDO task = ScheduledTaskConvert.INSTANCE.toTask(request);
+        if (task.getEmailNotificationPolicy() == null) task.setEmailNotificationPolicy("ALL");
         saveScript(task, request.getScript());
         scheduledTaskMapper.insert(task);
         task.setQuartzJobName(TaskQuartzConstants.jobName(task.getId()));
@@ -52,6 +56,7 @@ public class ScheduledTaskServiceImpl implements ScheduledTaskService {
         ScheduledTaskDO task = validateTask(taskId);
         quartzTaskService.pause(task);
         ScheduledTaskConvert.INSTANCE.updateTask(request, task);
+        if (task.getEmailNotificationPolicy() == null) task.setEmailNotificationPolicy("ALL");
         saveScript(task, request.getScript());
         scheduledTaskMapper.updateById(task);
         if (CommonStatusEnum.isEnabled(task.getEnabled())) quartzTaskService.schedule(task);

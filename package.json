@@ -1,7 +1,7 @@
 {
   "name": "cx-cron-vben-monorepo",
   "private": true,
-  "version": "1.1.0",
+  "version": "1.2.0",
   "type": "module",
   "scripts": {
     "dev": "pnpm --filter @vben/web-antd dev",

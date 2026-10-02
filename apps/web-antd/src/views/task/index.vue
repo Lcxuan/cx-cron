@@ -113,6 +113,13 @@
             <a-button>选择脚本</a-button>
           </a-upload>
         </a-form-item>
+        <a-form-item label="邮件通知" name="emailNotificationPolicy">
+          <a-radio-group v-model:value="form.emailNotificationPolicy">
+            <a-radio value="OFF">关闭</a-radio>
+            <a-radio value="FAILURE">仅失败时通知</a-radio>
+            <a-radio value="ALL">每次执行都通知</a-radio>
+          </a-radio-group>
+        </a-form-item>
         <a-form-item
           label="启用状态"
           name="enabled"
@@ -165,6 +172,7 @@ const form = reactive<TaskApi.TaskParams>({
   cronExpression: '',
   runCommand: '',
   enabled: 1,
+  emailNotificationPolicy: 'ALL',
 });
 
 async function loadTasks() {
@@ -191,6 +199,7 @@ function resetForm(task?: TaskApi.Task) {
   form.cronExpression = task?.cronExpression ?? '';
   form.runCommand = task?.runCommand ?? '';
   form.enabled = task?.enabled ?? 1;
+  form.emailNotificationPolicy = task?.emailNotificationPolicy ?? 'ALL';
   form.script = undefined;
   formRef.value?.clearValidate();
 }
