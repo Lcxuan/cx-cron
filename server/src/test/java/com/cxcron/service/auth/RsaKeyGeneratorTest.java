@@ -25,7 +25,7 @@ class RsaKeyGeneratorTest {
         assertTrue(privateKey.startsWith("-----BEGIN PRIVATE KEY-----"));
         assertTrue(publicKey.startsWith("-----BEGIN PUBLIC KEY-----"));
 
-        System.out.println("AUTH_RSA_PRIVATE_KEY=" + privateKey.replace("\n", "\\n"));
+        System.out.println("AUTH_RSA_PRIVATE_KEY = " + privateKey.replace("\n", "\\n"));
         System.out.println(publicKey);
     }
 

@@ -28,7 +28,7 @@ public class ExecutionRecordDO extends BaseDO {
     private String idempotencyKey;
 
     /**
-     * 执行结果。
+     * 执行结果：SUCCESS-执行成功，FAILED-执行失败。
      */
     private String resultType;
 

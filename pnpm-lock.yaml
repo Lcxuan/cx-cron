@@ -291,6 +291,9 @@ importers:
 
   apps/web-antd:
     dependencies:
+      '@vben/access':
+        specifier: workspace:*
+        version: link:../../packages/effects/access
       '@vben/hooks':
         specifier: workspace:*
         version: link:../../packages/effects/hooks
@@ -805,6 +808,24 @@ importers:
       '@vben-core/shared':
         specifier: workspace:*
         version: link:../@core/base/shared
+
+  packages/effects/access:
+    dependencies:
+      '@vben/preferences':
+        specifier: workspace:*
+        version: link:../../preferences
+      '@vben/stores':
+        specifier: workspace:*
+        version: link:../../stores
+      '@vben/types':
+        specifier: workspace:*
+        version: link:../../types
+      '@vben/utils':
+        specifier: workspace:*
+        version: link:../../utils
+      vue:
+        specifier: 3.5.34
+        version: 3.5.34(typescript@6.0.3)
 
   packages/effects/hooks:
     dependencies:

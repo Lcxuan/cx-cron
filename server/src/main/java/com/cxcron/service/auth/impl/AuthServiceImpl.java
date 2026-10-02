@@ -13,6 +13,7 @@ import com.cxcron.enums.exception.GlobalErrorCodeConstants;
 import com.cxcron.mapper.AdminUserMapper;
 import com.cxcron.service.auth.AuthService;
 import com.cxcron.service.auth.RsaCryptoService;
+import com.cxcron.service.menu.SystemMenuService;
 import com.cxcron.service.token.TokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,6 +30,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final RsaCryptoService rsaCryptoService;
     private final TokenService tokenService;
+    private final SystemMenuService systemMenuService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -64,6 +66,8 @@ public class AuthServiceImpl implements AuthService {
         if (user == null) {
             throw new BusinessException(GlobalErrorCodeConstants.UNAUTHORIZED);
         }
-        return AuthConvert.INSTANCE.toCurrentUserResp(user);
+        CurrentUserResp response = AuthConvert.INSTANCE.toCurrentUserResp(user);
+        response.setMenus(systemMenuService.getEnabledMenuRoutes());
+        return response;
     }
 }

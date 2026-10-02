@@ -28,6 +28,20 @@ export namespace AuthApi {
     refreshTokenExpiresIn: number;
   }
 
+  export interface MenuRouteResp {
+    id: string;
+    parentId: string;
+    name: string;
+    path: string;
+    component: string;
+    componentName: null | string;
+    icon: null | string;
+    visible: boolean;
+    keepAlive: boolean;
+    alwaysShow: boolean;
+    children: MenuRouteResp[];
+  }
+
   /**
    * 当前登录用户信息。
    */
@@ -35,6 +49,7 @@ export namespace AuthApi {
     id: number;
     username: string;
     nickname: string;
+    menus: MenuRouteResp[];
   }
 }
 

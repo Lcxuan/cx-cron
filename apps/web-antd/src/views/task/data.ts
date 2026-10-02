@@ -14,6 +14,6 @@ export const executionColumns: TableColumnsType<TaskApi.ExecutionRecord> = [
   { key: 'triggerType', title: '触发方式', width: 100 },
   { key: 'resultType', title: '结果', width: 90 },
   { dataIndex: 'summary', key: 'summary', title: '摘要', ellipsis: true },
-  { dataIndex: 'startedTime', key: 'startedTime', title: '开始时间', width: 170 },
-  { dataIndex: 'finishedTime', key: 'finishedTime', title: '结束时间', width: 170 },
+  { dataIndex: 'startedTime', key: 'startedTime', title: '开始时间', width: 180 },
+  { dataIndex: 'finishedTime', key: 'finishedTime', title: '结束时间', width: 180 },
 ];
