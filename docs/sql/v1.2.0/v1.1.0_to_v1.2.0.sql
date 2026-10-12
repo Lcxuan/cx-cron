@@ -1,5 +1,11 @@
 ALTER TABLE scheduled_tasks ADD COLUMN IF NOT EXISTS email_notification_policy varchar(20) NOT NULL DEFAULT 'ALL';
+ALTER TABLE scheduled_tasks ADD COLUMN IF NOT EXISTS schedule_type varchar(20) NOT NULL DEFAULT 'CRON';
+ALTER TABLE scheduled_tasks ADD COLUMN IF NOT EXISTS random_start_time time;
+ALTER TABLE scheduled_tasks ADD COLUMN IF NOT EXISTS random_end_time time;
 COMMENT ON COLUMN scheduled_tasks.email_notification_policy IS '邮件通知策略：OFF、FAILURE、ALL';
+COMMENT ON COLUMN scheduled_tasks.schedule_type IS '调度方式：CRON、RANDOM_DAILY';
+COMMENT ON COLUMN scheduled_tasks.random_start_time IS '每日随机执行的开始时间';
+COMMENT ON COLUMN scheduled_tasks.random_end_time IS '每日随机执行的结束时间';
 
 CREATE TABLE IF NOT EXISTS system_email_config (
     id bigint NOT NULL,
@@ -38,7 +44,10 @@ CREATE TABLE IF NOT EXISTS task_email_notifications (
     execution_record_id bigint NOT NULL,
     scheduled_task_id bigint NOT NULL,
     task_name varchar(255),
+    schedule_type varchar(20),
     cron_expression varchar(100),
+    random_start_time time,
+    random_end_time time,
     recipient varchar(255),
     subject varchar(500),
     html_body text,
@@ -58,7 +67,10 @@ COMMENT ON COLUMN task_email_notifications.id IS '主键 ID';
 COMMENT ON COLUMN task_email_notifications.execution_record_id IS '任务执行记录 ID';
 COMMENT ON COLUMN task_email_notifications.scheduled_task_id IS '定时任务 ID';
 COMMENT ON COLUMN task_email_notifications.task_name IS '任务名称';
+COMMENT ON COLUMN task_email_notifications.schedule_type IS '调度方式快照：CRON、RANDOM_DAILY';
 COMMENT ON COLUMN task_email_notifications.cron_expression IS 'Cron 表达式';
+COMMENT ON COLUMN task_email_notifications.random_start_time IS '每日随机执行开始时间快照';
+COMMENT ON COLUMN task_email_notifications.random_end_time IS '每日随机执行结束时间快照';
 COMMENT ON COLUMN task_email_notifications.recipient IS '通知收件人';
 COMMENT ON COLUMN task_email_notifications.subject IS '邮件主题快照';
 COMMENT ON COLUMN task_email_notifications.html_body IS '邮件 HTML 正文快照';
@@ -115,3 +127,6 @@ COMMENT ON COLUMN system_menus.deleted IS '逻辑删除标记：0-未删除，1-
 INSERT INTO system_menus (id, parent_id, name, path, component, component_name, type, icon, sort, enabled, visible, keep_alive, always_show) VALUES (1, 0, '任务管理', '/task', 'task/index', 'Task', 'MENU', 'lucide:list-todo', 1, 1, 0, 0, 0);
 INSERT INTO system_menus (id, parent_id, name, path, component, component_name, type, icon, sort, enabled, visible, keep_alive, always_show) VALUES (2, 0, '邮件配置', '/system/email-notification', 'system/email-notification/index', 'EmailNotification', 'MENU', 'lucide:mail', 2, 1, 0, 0, 0);
 INSERT INTO system_menus (id, parent_id, name, path, component, component_name, type, icon, sort, enabled, visible, keep_alive, always_show) VALUES (3, 0, '邮件日志', '/system/email-logs', 'system/email-logs/index', 'EmailLogs', 'MENU', 'lucide:mail-search', 3, 1, 0, 0, 0);
+
+ALTER TABLE execution_records ADD COLUMN IF NOT EXISTS execution_log text;
+COMMENT ON COLUMN execution_records.execution_log IS '原始命令输出日志，可能包含敏感内容';

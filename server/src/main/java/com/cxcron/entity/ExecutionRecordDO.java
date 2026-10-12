@@ -38,6 +38,11 @@ public class ExecutionRecordDO extends BaseDO {
     private String summary;
 
     /**
+     * 命令执行日志。
+     */
+    private String executionLog;
+
+    /**
      * Quartz 触发实例 ID。
      */
     private String quartzFireInstanceId;

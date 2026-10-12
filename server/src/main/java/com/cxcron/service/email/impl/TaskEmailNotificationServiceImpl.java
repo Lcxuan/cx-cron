@@ -64,7 +64,10 @@ public class TaskEmailNotificationServiceImpl implements TaskEmailNotificationSe
         notification.setExecutionRecordId(record.getId());
         notification.setScheduledTaskId(task.getId());
         notification.setTaskName(task.getName());
+        notification.setScheduleType(task.getScheduleType());
         notification.setCronExpression(task.getCronExpression());
+        notification.setRandomStartTime(task.getRandomStartTime());
+        notification.setRandomEndTime(task.getRandomEndTime());
         // 获取全局邮件配置；未启用或读取失败时记录相应通知状态。
         SystemEmailConfigDO config;
         try {

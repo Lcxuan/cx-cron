@@ -38,17 +38,23 @@ public class TaskExecutionServiceImpl implements TaskExecutionService {
         RLock lock = redissonClient.getLock("task-" + taskId);
         boolean locked = lock.tryLock();
         String summary = "任务正在执行";
+        String executionLog = "";
         String resultType = TaskExecutionResultEnum.FAILED.name();
         try {
             // 查询任务配置；只有成功获取锁且脚本文件有效时才执行命令。
             ScheduledTaskDO task = scheduledTaskMapper.selectById(taskId);
             if (locked) {
-                summary = task == null || task.getScriptPath() == null || !Files.isRegularFile(Path.of(task.getScriptPath()))
-                        ? "脚本不存在" : scriptCommandExecutor.execute(task.getRunCommand(), Path.of(task.getScriptPath()));
+                if (task == null || task.getScriptPath() == null || !Files.isRegularFile(Path.of(task.getScriptPath()))) {
+                    summary = "脚本不存在";
+                } else {
+                    ScriptCommandExecutor.ExecutionResult result = scriptCommandExecutor.execute(task.getRunCommand(), Path.of(task.getScriptPath()));
+                    summary = result.summary();
+                    executionLog = result.executionLog();
+                }
                 resultType = "执行成功".equals(summary) ? TaskExecutionResultEnum.SUCCESS.name() : TaskExecutionResultEnum.FAILED.name();
             }
             // 保存本次执行结果并更新任务最近执行状态。
-            ExecutionRecordDO record = saveRecord(taskId, triggerType, quartzFireInstanceId, startedTime, resultType, summary);
+            ExecutionRecordDO record = saveRecord(taskId, triggerType, quartzFireInstanceId, startedTime, resultType, summary, executionLog);
             updateLastSchedule(taskId, resultType, startedTime);
             // 任务记录存在时通知邮件服务；通知异常不影响任务执行结果。
             if (task != null) {
@@ -72,14 +78,18 @@ public class TaskExecutionServiceImpl implements TaskExecutionService {
      * @param startedTime 执行开始时间
      * @param resultType 执行结果
      * @param summary 执行摘要
+     * @param executionLog 命令执行日志
      * @return 已保存的执行记录
      */
     private ExecutionRecordDO saveRecord(Long taskId, String triggerType, String quartzFireInstanceId, LocalDateTime startedTime,
-                            String resultType, String summary) {
+                            String resultType, String summary, String executionLog) {
         ExecutionRecordDO record = new ExecutionRecordDO();
         record.setScheduledTaskId(taskId); record.setTriggerType(triggerType);
         record.setIdempotencyKey(taskId + "-" + startedTime.toLocalDate()); record.setQuartzFireInstanceId(quartzFireInstanceId);
-        record.setResultType(resultType); record.setSummary(summary); record.setStartedTime(startedTime);
+        record.setResultType(resultType); 
+        record.setSummary(summary); 
+        record.setExecutionLog(executionLog); 
+        record.setStartedTime(startedTime);
         record.setFinishedTime(LocalDateTime.now()); executionRecordMapper.insert(record);
         return record;
     }

@@ -6,6 +6,7 @@ public final class TaskQuartzConstants {
 
     public static final String GROUP = "CX_CRON";
     public static final String EXECUTION_SERVICE_KEY = "executionTaskService";
+    public static final String QUARTZ_TASK_SERVICE_KEY = "quartzTaskService";
 
     private TaskQuartzConstants() {
     }

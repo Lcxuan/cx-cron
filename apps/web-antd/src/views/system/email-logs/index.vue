@@ -48,6 +48,9 @@
           <a-tag v-else-if="record.status === 'FAILED'" color="error">发送失败</a-tag>
           <a-tag v-else color="default">已跳过</a-tag>
         </template>
+        <template v-else-if="column.key === 'scheduleConfig'">
+          <span>{{ formatScheduleConfig(record) }}</span>
+        </template>
         <template v-else-if="column.key === 'errorMessage'">
           <span>{{ record.errorMessage || '-' }}</span>
         </template>
@@ -85,7 +88,7 @@ import type { TableColumnsType } from 'ant-design-vue';
 
 const columns: TableColumnsType<EmailNotificationApi.Log> = [
   { dataIndex: 'taskName', key: 'taskName', title: '任务名称', width: 160, ellipsis: true },
-  { dataIndex: 'cronExpression', key: 'cronExpression', title: 'Cron 表达式', width: 150, ellipsis: true },
+  { key: 'scheduleConfig', title: '调度配置', width: 180, ellipsis: true },
   { dataIndex: 'recipient', key: 'recipient', title: '收件人', width: 180, ellipsis: true },
   { key: 'status', title: '状态', width: 100 },
   { dataIndex: 'createTime', key: 'createTime', title: '创建时间', width: 180 },
@@ -122,6 +125,16 @@ async function loadLogs() {
   } finally {
     isLoading.value = false;
   }
+}
+
+function formatScheduleConfig(log: EmailNotificationApi.Log) {
+  if (!log.scheduleType) return '未记录';
+  if (log.scheduleType === 'RANDOM_DAILY') {
+    return log.randomStartTime && log.randomEndTime
+      ? `每日随机：${log.randomStartTime}–${log.randomEndTime}`
+      : '每日随机';
+  }
+  return log.cronExpression || '-';
 }
 
 function handleSearch() {

@@ -4,7 +4,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalTime;
 
 @Data
 @Schema(description = "更新定时任务请求")
@@ -14,9 +17,20 @@ public class TaskUpdateReq {
     @NotBlank(message = "任务名称不能为空")
     private String name;
 
-    @Schema(description = "Cron 表达式", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank(message = "Cron 表达式不能为空")
+    @Schema(description = "调度方式：CRON-按 Cron 定时，RANDOM_DAILY-每天随机执行", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "调度方式不能为空")
+    private String scheduleType = "CRON";
+
+    @Schema(description = "Cron 表达式；Cron 定时模式必填")
     private String cronExpression;
+
+    @Schema(description = "每日随机执行开始时间；格式 HH:mm")
+    @DateTimeFormat(pattern = "HH:mm")
+    private LocalTime randomStartTime;
+
+    @Schema(description = "每日随机执行结束时间；格式 HH:mm")
+    @DateTimeFormat(pattern = "HH:mm")
+    private LocalTime randomEndTime;
 
     @Schema(description = "运行命令", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "运行命令不能为空")

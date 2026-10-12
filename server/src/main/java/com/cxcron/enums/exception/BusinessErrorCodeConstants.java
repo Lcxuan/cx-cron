@@ -15,6 +15,7 @@ public enum BusinessErrorCodeConstants implements ErrorCode {
     TASK_NOT_FOUND("2001", "任务不存在"),
     TASK_CRON_INVALID("2002", "Cron 表达式不合法"),
     TASK_DISABLED("2003", "任务已暂停"),
+    TASK_SCHEDULE_INVALID("2004", "任务调度方式或随机时间范围不合法"),
 
     // 邮件
     EMAIL_CONFIG_INVALID("3001", "邮件配置不完整或无效"),

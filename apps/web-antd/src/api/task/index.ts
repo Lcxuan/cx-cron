@@ -24,25 +24,57 @@ export namespace EmailNotificationApi {
    * 邮件通知日志。
    */
   export interface Log {
-    /** 日志 ID。 */
+    /**
+     * 日志 ID。
+     */
     id: number;
-    /** 任务名称快照。 */
+    /**
+     * 任务名称快照。
+     */
     taskName: string | null;
-    /** Cron 表达式快照。 */
+    /**
+     * 调度方式快照。
+     */
+    scheduleType: 'CRON' | 'RANDOM_DAILY' | null;
+    /**
+     * Cron 表达式快照。
+     */
     cronExpression: string | null;
-    /** 收件人邮箱。 */
+    /**
+     * 每日随机执行开始时间快照。
+     */
+    randomStartTime: string | null;
+    /**
+     * 每日随机执行结束时间快照。
+     */
+    randomEndTime: string | null;
+    /**
+     * 收件人邮箱。
+     */
     recipient: string | null;
-    /** 通知状态。 */
+    /**
+     * 通知状态。
+     */
     status: 'PENDING' | 'SENT' | 'FAILED' | 'SKIPPED';
-    /** 日志创建时间。 */
+    /**
+     * 日志创建时间。
+     */
     createTime: string;
-    /** 邮件发送成功时间。 */
+    /**
+     * 邮件发送成功时间。
+     */
     sentTime: string | null;
-    /** 发送失败或跳过原因。 */
+    /**
+     * 发送失败或跳过原因。
+     */
     errorMessage: string | null;
-    /** 邮件主题快照。 */
+    /**
+     * 邮件主题快照。
+     */
     subject: string | null;
-    /** 邮件 HTML 正文快照。 */
+    /**
+     * 邮件 HTML 正文快照。
+     */
     htmlBody: string | null;
   }
 
@@ -50,15 +82,25 @@ export namespace EmailNotificationApi {
    * 邮件日志分页查询参数。
    */
   export interface LogQuery extends PageParams {
-    /** 通知状态筛选。 */
+    /**
+     * 通知状态筛选。
+     */
     status?: string;
-    /** 任务名称模糊筛选。 */
+    /**
+     * 任务名称模糊筛选。
+     */
     taskName?: string;
-    /** 收件人邮箱模糊筛选。 */
+    /**
+     * 收件人邮箱模糊筛选。
+     */
     recipient?: string;
-    /** 创建时间范围起始值。 */
+    /**
+     * 创建时间范围起始值。
+     */
     createTimeStart?: string;
-    /** 创建时间范围结束值。 */
+    /**
+     * 创建时间范围结束值。
+     */
     createTimeEnd?: string;
   }
 }
@@ -99,6 +141,9 @@ export namespace TaskApi {
     id: number;
     name: string;
     cronExpression: string;
+    scheduleType: 'CRON' | 'RANDOM_DAILY';
+    randomStartTime: string | null;
+    randomEndTime: string | null;
     scriptPath: string;
     runCommand: string;
     enabled: 0 | 1;
@@ -114,7 +159,10 @@ export namespace TaskApi {
    */
   export interface TaskParams {
     name: string;
+    scheduleType: 'CRON' | 'RANDOM_DAILY';
     cronExpression: string;
+    randomStartTime?: string;
+    randomEndTime?: string;
     runCommand: string;
     enabled: 0 | 1;
     emailNotificationPolicy: 'OFF' | 'FAILURE' | 'ALL';
@@ -131,6 +179,7 @@ export namespace TaskApi {
     idempotencyKey: string;
     resultType: 'SUCCESS' | 'FAILED';
     summary: string | null;
+    executionLog: string | null;
     quartzFireInstanceId: string | null;
     startedTime: string | null;
     finishedTime: string | null;
@@ -143,7 +192,12 @@ export namespace TaskApi {
 function taskFormData(data: TaskApi.TaskParams) {
   const formData = new FormData();
   formData.append('name', data.name);
-  formData.append('cronExpression', data.cronExpression);
+  formData.append('scheduleType', data.scheduleType);
+  formData.append('cronExpression', data.scheduleType === 'CRON' ? data.cronExpression : '');
+  if (data.scheduleType === 'RANDOM_DAILY') {
+    formData.append('randomStartTime', data.randomStartTime ?? '');
+    formData.append('randomEndTime', data.randomEndTime ?? '');
+  }
   formData.append('runCommand', data.runCommand);
   formData.append('enabled', String(data.enabled));
   formData.append('emailNotificationPolicy', data.emailNotificationPolicy);

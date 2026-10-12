@@ -60,8 +60,11 @@ export const authenticateResponseInterceptor = ({
   return {
     rejected: async (error) => {
       const { config, response } = error;
-      // 如果不是 401 错误，直接抛出异常
-      if (response?.status !== 401) {
+      // 后端可能通过 HTTP 200 返回业务未登录码 401
+      if (
+        response?.status !== 401 &&
+        Number(response?.data?.code ?? error?.data?.code) !== 401
+      ) {
         throw error;
       }
       // 判断是否启用了 refreshToken 功能

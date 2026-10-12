@@ -1,9 +1,11 @@
 package com.cxcron.controller.task.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Data
 @Schema(description = "定时任务响应")
@@ -16,6 +18,17 @@ public class ScheduledTaskResp {
 
     @Schema(description = "Cron 表达式")
     private String cronExpression;
+
+    @Schema(description = "任务调度方式：CRON 或 RANDOM_DAILY")
+    private String scheduleType;
+
+    @Schema(description = "每日随机执行开始时间")
+    @JsonFormat(pattern = "HH:mm")
+    private LocalTime randomStartTime;
+
+    @Schema(description = "每日随机执行结束时间")
+    @JsonFormat(pattern = "HH:mm")
+    private LocalTime randomEndTime;
 
     @Schema(description = "任务脚本存储路径")
     private String scriptPath;

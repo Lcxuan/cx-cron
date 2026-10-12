@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 /**
  * 任务邮件通知记录实体。
@@ -30,9 +31,24 @@ public class TaskEmailNotificationDO extends BaseDO {
     private String taskName;
 
     /**
+     * 调度方式快照：CRON 或 RANDOM_DAILY。
+     */
+    private String scheduleType;
+
+    /**
      * Cron 表达式快照。
      */
     private String cronExpression;
+
+    /**
+     * 每日随机执行开始时间快照。
+     */
+    private LocalTime randomStartTime;
+
+    /**
+     * 每日随机执行结束时间快照。
+     */
+    private LocalTime randomEndTime;
 
     /**
      * 通知收件人。

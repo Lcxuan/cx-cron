@@ -23,8 +23,16 @@
         <template v-else-if="column.key === 'startedTime' || column.key === 'finishedTime'">
           {{ record[column.key] || '-' }}
         </template>
+        <template v-else-if="column.key === 'executionLog'">
+          <a-button type="link" size="small" @click="showExecutionLog(record)">查看</a-button>
+        </template>
       </template>
     </a-table>
+    <a-modal v-model:open="isLogOpen" title="命令执行日志" :footer="null" width="min(900px, 100vw)">
+      <a-alert message="日志可能包含敏感内容，请谨慎查看和分享。" type="warning" show-icon />
+      <pre v-if="selectedRecord?.executionLog" class="execution-log">{{ selectedRecord.executionLog }}</pre>
+      <a-empty v-else description="该记录没有执行日志" />
+    </a-modal>
     <a-pagination
       v-if="total > 0"
       class="execution-pagination"
@@ -52,6 +60,13 @@ const total = ref(0);
 const pageNo = ref(1);
 const pageSize = ref(10);
 const isLoading = ref(false);
+const isLogOpen = ref(false);
+const selectedRecord = ref<TaskApi.ExecutionRecord>();
+
+function showExecutionLog(record: TaskApi.ExecutionRecord) {
+  selectedRecord.value = record;
+  isLogOpen.value = true;
+}
 
 async function loadRecords() {
   if (!props.task) return;
@@ -85,6 +100,16 @@ watch(
 </script>
 
 <style scoped>
+.execution-log {
+  max-height: 60vh;
+  overflow: auto;
+  padding: 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
 .execution-pagination {
   margin-top: 16px;
   text-align: right;

@@ -84,6 +84,9 @@ CREATE TABLE scheduled_tasks (
     id bigint NOT NULL,
     name varchar(128) NOT NULL,
     cron_expression varchar(128) NOT NULL,
+    schedule_type varchar(20) NOT NULL DEFAULT 'CRON',
+    random_start_time time,
+    random_end_time time,
     script_path varchar(512) NOT NULL,
     run_command varchar(512) NOT NULL,
     enabled smallint NOT NULL DEFAULT 1,
@@ -101,6 +104,9 @@ CREATE TABLE scheduled_tasks (
 COMMENT ON TABLE scheduled_tasks IS '定时任务表';
 COMMENT ON COLUMN scheduled_tasks.id IS '主键 ID';
 COMMENT ON COLUMN scheduled_tasks.cron_expression IS 'Cron 表达式';
+COMMENT ON COLUMN scheduled_tasks.schedule_type IS '调度方式：CRON、RANDOM_DAILY';
+COMMENT ON COLUMN scheduled_tasks.random_start_time IS '每日随机执行的开始时间';
+COMMENT ON COLUMN scheduled_tasks.random_end_time IS '每日随机执行的结束时间';
 COMMENT ON COLUMN scheduled_tasks.enabled IS '是否启用：0-暂停，1-启用';
 COMMENT ON COLUMN scheduled_tasks.quartz_job_name IS 'Quartz Job 名称';
 COMMENT ON COLUMN scheduled_tasks.last_schedule_status IS '最近调度状态';
@@ -119,6 +125,7 @@ CREATE TABLE execution_records (
     idempotency_key varchar(128) NOT NULL,
     result_type varchar(32) NOT NULL,
     summary varchar(512),
+    execution_log text,
     quartz_fire_instance_id varchar(128),
     started_time timestamp NOT NULL,
     finished_time timestamp,
@@ -136,6 +143,7 @@ COMMENT ON COLUMN execution_records.trigger_type IS '触发方式：SCHEDULED-�
 COMMENT ON COLUMN execution_records.idempotency_key IS '业务幂等键';
 COMMENT ON COLUMN execution_records.result_type IS '执行结果：SUCCESS-执行成功，FAILED-执行失败';
 COMMENT ON COLUMN execution_records.summary IS '脱敏执行摘要';
+COMMENT ON COLUMN execution_records.execution_log IS '原始命令输出日志，可能包含敏感内容';
 COMMENT ON COLUMN execution_records.quartz_fire_instance_id IS 'Quartz 触发实例 ID';
 COMMENT ON COLUMN execution_records.started_time IS '开始执行时间';
 COMMENT ON COLUMN execution_records.finished_time IS '结束执行时间';
@@ -182,7 +190,10 @@ CREATE TABLE task_email_notifications (
     execution_record_id bigint NOT NULL,
     scheduled_task_id bigint NOT NULL,
     task_name varchar(255),
+    schedule_type varchar(20),
     cron_expression varchar(100),
+    random_start_time time,
+    random_end_time time,
     recipient varchar(255),
     subject varchar(500),
     html_body text,
@@ -200,7 +211,10 @@ COMMENT ON COLUMN task_email_notifications.id IS '主键 ID';
 COMMENT ON COLUMN task_email_notifications.execution_record_id IS '任务执行记录 ID';
 COMMENT ON COLUMN task_email_notifications.scheduled_task_id IS '定时任务 ID';
 COMMENT ON COLUMN task_email_notifications.task_name IS '任务名称';
-COMMENT ON COLUMN task_email_notifications.cron_expression IS 'Cron 表达式';
+COMMENT ON COLUMN task_email_notifications.schedule_type IS '调度方式快照：CRON、RANDOM_DAILY';
+COMMENT ON COLUMN task_email_notifications.cron_expression IS 'Cron 表达式快照';
+COMMENT ON COLUMN task_email_notifications.random_start_time IS '每日随机执行开始时间快照';
+COMMENT ON COLUMN task_email_notifications.random_end_time IS '每日随机执行结束时间快照';
 COMMENT ON COLUMN task_email_notifications.recipient IS '通知收件人';
 COMMENT ON COLUMN task_email_notifications.subject IS '邮件主题快照';
 COMMENT ON COLUMN task_email_notifications.html_body IS '邮件 HTML 正文快照';

@@ -11,6 +11,7 @@ import com.cxcron.controller.task.vo.ScheduledTaskResp;
 import com.cxcron.convert.scheduledtask.ScheduledTaskConvert;
 import com.cxcron.entity.ExecutionRecordDO;
 import com.cxcron.entity.ScheduledTaskDO;
+import com.cxcron.enums.TaskScheduleTypeEnum;
 import com.cxcron.enums.exception.BusinessErrorCodeConstants;
 import com.cxcron.enums.exception.BusinessException;
 import com.cxcron.mapper.ExecutionRecordMapper;
@@ -22,6 +23,8 @@ import com.cxcron.service.task.ScriptStorage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalTime;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +41,7 @@ public class ScheduledTaskServiceImpl implements ScheduledTaskService {
     @Override
     @Transactional
     public Long create(TaskCreateReq request) {
-        validateCron(request.getCronExpression());
+        validateSchedule(request.getScheduleType(), request.getCronExpression(), request.getRandomStartTime(), request.getRandomEndTime());
         ScheduledTaskDO task = ScheduledTaskConvert.INSTANCE.toTask(request);
         if (task.getEmailNotificationPolicy() == null) task.setEmailNotificationPolicy("ALL");
         saveScript(task, request.getScript());
@@ -52,14 +55,17 @@ public class ScheduledTaskServiceImpl implements ScheduledTaskService {
     @Override
     @Transactional
     public void update(Long taskId, TaskUpdateReq request) {
-        validateCron(request.getCronExpression());
+        validateSchedule(request.getScheduleType(), request.getCronExpression(), request.getRandomStartTime(), request.getRandomEndTime());
         ScheduledTaskDO task = validateTask(taskId);
-        quartzTaskService.pause(task);
         ScheduledTaskConvert.INSTANCE.updateTask(request, task);
         if (task.getEmailNotificationPolicy() == null) task.setEmailNotificationPolicy("ALL");
         saveScript(task, request.getScript());
         scheduledTaskMapper.updateById(task);
-        if (CommonStatusEnum.isEnabled(task.getEnabled())) quartzTaskService.schedule(task);
+        if (CommonStatusEnum.isEnabled(task.getEnabled())) {
+            quartzTaskService.schedule(task);
+        } else {
+            quartzTaskService.pause(task);
+        }
     }
 
     @Override
@@ -113,19 +119,26 @@ public class ScheduledTaskServiceImpl implements ScheduledTaskService {
     }
 
     /**
+     * 校验任务的调度配置。
+     */
+    private void validateSchedule(String scheduleType, String cronExpression, LocalTime start, LocalTime end) {
+        if (TaskScheduleTypeEnum.CRON.name().equals(scheduleType)) {
+            if (!TaskQuartzConstants.isValidCron(cronExpression)) throw new BusinessException(BusinessErrorCodeConstants.TASK_CRON_INVALID);
+            return;
+        }
+        if (!TaskScheduleTypeEnum.RANDOM_DAILY.name().equals(scheduleType)
+                || !com.cxcron.quartz.RandomDailySchedule.isValidWindow(start, end)) {
+            throw new BusinessException(BusinessErrorCodeConstants.TASK_SCHEDULE_INVALID);
+        }
+    }
+
+    /**
      * 校验任务是否存在。
      */
     private ScheduledTaskDO validateTask(Long taskId) {
         ScheduledTaskDO task = scheduledTaskMapper.selectById(taskId);
         if (task == null) throw new BusinessException(BusinessErrorCodeConstants.TASK_NOT_FOUND);
         return task;
-    }
-
-    /**
-     * 校验 Cron 表达式格式。
-     */
-    private void validateCron(String cronExpression) {
-        if (!TaskQuartzConstants.isValidCron(cronExpression)) throw new BusinessException(BusinessErrorCodeConstants.TASK_CRON_INVALID);
     }
 
 }

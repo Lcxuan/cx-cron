@@ -26,6 +26,9 @@ public class ExecutionRecordResp {
     @Schema(description = "执行摘要")
     private String summary;
 
+    @Schema(description = "原始命令输出日志，可能包含敏感内容")
+    private String executionLog;
+
     @Schema(description = "Quartz 调度触发实例 ID")
     private String quartzFireInstanceId;
 

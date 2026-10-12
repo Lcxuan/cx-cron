@@ -3,7 +3,7 @@ import type { TaskApi } from '#/api/task';
 
 export const taskColumns: TableColumnsType<TaskApi.Task> = [
   { dataIndex: 'name', key: 'name', title: '任务名称', ellipsis: true },
-  { dataIndex: 'cronExpression', key: 'cronExpression', title: 'Cron 表达式', ellipsis: true },
+  { key: 'schedule', title: '调度配置', ellipsis: true },
   { key: 'enabled', title: '状态', width: 100 },
   { key: 'lastScheduleStatus', title: '最近执行结果', width: 130 },
   { dataIndex: 'lastScheduleTime', key: 'lastScheduleTime', title: '最近执行时间', width: 180 },
@@ -16,4 +16,5 @@ export const executionColumns: TableColumnsType<TaskApi.ExecutionRecord> = [
   { dataIndex: 'summary', key: 'summary', title: '摘要', ellipsis: true },
   { dataIndex: 'startedTime', key: 'startedTime', title: '开始时间', width: 180 },
   { dataIndex: 'finishedTime', key: 'finishedTime', title: '结束时间', width: 180 },
+  { key: 'executionLog', title: '日志', width: 80, fixed: 'right' },
 ];

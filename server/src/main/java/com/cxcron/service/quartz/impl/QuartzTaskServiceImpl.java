@@ -3,8 +3,10 @@ package com.cxcron.service.quartz.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.cxcron.common.enums.CommonStatusEnum;
 import com.cxcron.entity.ScheduledTaskDO;
+import com.cxcron.enums.TaskScheduleTypeEnum;
 import com.cxcron.enums.TaskTriggerTypeEnum;
 import com.cxcron.mapper.ScheduledTaskMapper;
+import com.cxcron.quartz.RandomDailySchedule;
 import com.cxcron.quartz.ScheduledTaskJob;
 import com.cxcron.quartz.TaskQuartzConstants;
 import com.cxcron.service.execution.TaskExecutionService;
@@ -13,9 +15,11 @@ import lombok.RequiredArgsConstructor;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
+import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
@@ -23,6 +27,9 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -38,9 +45,10 @@ public class QuartzTaskServiceImpl implements QuartzTaskService, ApplicationRunn
     public void run(ApplicationArguments args) {
         try {
             scheduler.getContext().put(TaskQuartzConstants.EXECUTION_SERVICE_KEY, taskExecutionService);
+            scheduler.getContext().put(TaskQuartzConstants.QUARTZ_TASK_SERVICE_KEY, this);
             List<ScheduledTaskDO> tasks = scheduledTaskMapper.selectList(new LambdaQueryWrapper<ScheduledTaskDO>()
                     .eq(ScheduledTaskDO::getEnabled, CommonStatusEnum.ENABLE.getCode()));
-            tasks.forEach(this::schedule);
+            tasks.forEach(this::recover);
         } catch (SchedulerException e) {
             throw new IllegalStateException("Quartz 任务恢复失败", e);
         }
@@ -50,22 +58,69 @@ public class QuartzTaskServiceImpl implements QuartzTaskService, ApplicationRunn
     public void schedule(ScheduledTaskDO task) {
         try {
             JobKey jobKey = jobKey(task.getId());
-            Trigger trigger = buildTrigger(task);
+            Trigger trigger = buildTrigger(task, LocalDateTime.now());
             if (scheduler.checkExists(jobKey)) {
-                if (scheduler.checkExists(trigger.getKey())) {
-                    scheduler.rescheduleJob(trigger.getKey(), trigger);
-                } else {
-                    scheduler.scheduleJob(trigger);
-                }
+                replaceTrigger(trigger);
                 scheduler.resumeJob(jobKey);
                 return;
             }
-            scheduler.scheduleJob(JobBuilder.newJob(ScheduledTaskJob.class)
-                    .withIdentity(jobKey)
-                    .usingJobData(new JobDataMap(Map.of(ScheduledTaskJob.TASK_ID_KEY, task.getId())))
-                    .build(), trigger);
+            scheduler.scheduleJob(buildJob(task), trigger);
         } catch (SchedulerException e) {
             throw new IllegalStateException("Quartz 任务调度失败", e);
+        }
+    }
+
+    @Override
+    public void recover(ScheduledTaskDO task) {
+        try {
+            JobKey jobKey = jobKey(task.getId());
+            TriggerKey triggerKey = triggerKey(task.getId());
+            if (TaskScheduleTypeEnum.RANDOM_DAILY.name().equals(task.getScheduleType())) {
+                if (scheduler.checkExists(jobKey) && scheduler.checkExists(triggerKey)) {
+                    Trigger trigger = scheduler.getTrigger(triggerKey);
+                    if (trigger != null && trigger.getNextFireTime() != null && trigger.getNextFireTime().after(new Date())) {
+                        scheduler.resumeJob(jobKey);
+                        return;
+                    }
+                }
+                Trigger trigger = randomTrigger(task, RandomDailySchedule.nextDayExecutionTime(
+                        task.getRandomStartTime(), task.getRandomEndTime(), LocalDateTime.now()));
+                if (scheduler.checkExists(jobKey)) {
+                    replaceTrigger(trigger);
+                    scheduler.resumeJob(jobKey);
+                } else {
+                    scheduler.scheduleJob(buildJob(task), trigger);
+                }
+                return;
+            }
+            schedule(task);
+        } catch (SchedulerException e) {
+            throw new IllegalStateException("Quartz 任务恢复失败", e);
+        }
+    }
+
+    @Override
+    public void scheduleNextRandom(Long taskId, LocalDateTime scheduledAt) {
+        ScheduledTaskDO task = scheduledTaskMapper.selectById(taskId);
+        if (task == null || !CommonStatusEnum.isEnabled(task.getEnabled())
+                || !TaskScheduleTypeEnum.RANDOM_DAILY.name().equals(task.getScheduleType())) return;
+        try {
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime earliest = scheduledAt.toLocalDate().plusDays(1).atStartOfDay();
+            if (now.isAfter(earliest)) earliest = now;
+            LocalDateTime next = RandomDailySchedule.nextExecutionTime(
+                    task.getRandomStartTime(), task.getRandomEndTime(), earliest);
+            Trigger trigger = randomTrigger(task, next);
+            TriggerKey triggerKey = triggerKey(taskId);
+            Trigger existing = scheduler.getTrigger(triggerKey);
+            if (existing != null && existing.getNextFireTime() != null && existing.getNextFireTime().after(new Date())) return;
+            if (scheduler.checkExists(triggerKey)) {
+                scheduler.rescheduleJob(triggerKey, trigger);
+            } else {
+                scheduler.scheduleJob(trigger);
+            }
+        } catch (SchedulerException e) {
+            throw new IllegalStateException("Quartz 每日随机调度失败", e);
         }
     }
 
@@ -98,27 +153,49 @@ public class QuartzTaskServiceImpl implements QuartzTaskService, ApplicationRunn
         }
     }
 
-    /**
-     * 根据任务 ID 构建 Quartz Job Key。
-     *
-     * @param taskId 任务 ID
-     * @return Job Key
-     */
+    private void replaceTrigger(Trigger trigger) throws SchedulerException {
+        TriggerKey triggerKey = trigger.getKey();
+        if (scheduler.checkExists(triggerKey)) {
+            scheduler.rescheduleJob(triggerKey, trigger);
+        } else {
+            scheduler.scheduleJob(trigger);
+        }
+    }
+
+    private static JobDetail buildJob(ScheduledTaskDO task) {
+        return JobBuilder.newJob(ScheduledTaskJob.class)
+                .withIdentity(jobKey(task.getId()))
+                .usingJobData(new JobDataMap(Map.of(ScheduledTaskJob.TASK_ID_KEY, task.getId())))
+                .build();
+    }
+
+    private static Trigger buildTrigger(ScheduledTaskDO task, LocalDateTime now) {
+        if (TaskScheduleTypeEnum.RANDOM_DAILY.name().equals(task.getScheduleType())) {
+            LocalDateTime next = RandomDailySchedule.nextExecutionTime(
+                    task.getRandomStartTime(), task.getRandomEndTime(), now);
+            return randomTrigger(task, next);
+        }
+        return TriggerBuilder.newTrigger()
+                .withIdentity(triggerKey(task.getId()))
+                .forJob(jobKey(task.getId()))
+                .withSchedule(CronScheduleBuilder.cronSchedule(task.getCronExpression()))
+                .build();
+    }
+
+    private static Trigger randomTrigger(ScheduledTaskDO task, LocalDateTime next) {
+        return TriggerBuilder.newTrigger()
+                .withIdentity(triggerKey(task.getId()))
+                .forJob(jobKey(task.getId()))
+                .startAt(Date.from(next.atZone(ZoneId.systemDefault()).toInstant()))
+                .withSchedule(SimpleScheduleBuilder.simpleSchedule().withRepeatCount(0))
+                .build();
+    }
+
     private static JobKey jobKey(Long taskId) {
         return JobKey.jobKey(TaskQuartzConstants.jobName(taskId), TaskQuartzConstants.GROUP);
     }
 
-    /**
-     * 根据任务 Cron 表达式构建 Trigger。
-     *
-     * @param task 定时任务
-     * @return Cron Trigger
-     */
-    private static Trigger buildTrigger(ScheduledTaskDO task) {
-        return TriggerBuilder.newTrigger()
-                .withIdentity(TriggerKey.triggerKey(TaskQuartzConstants.triggerName(task.getId()), TaskQuartzConstants.GROUP))
-                .forJob(jobKey(task.getId()))
-                .withSchedule(CronScheduleBuilder.cronSchedule(task.getCronExpression()))
-                .build();
+    private static TriggerKey triggerKey(Long taskId) {
+        return TriggerKey.triggerKey(TaskQuartzConstants.triggerName(taskId), TaskQuartzConstants.GROUP);
     }
 }

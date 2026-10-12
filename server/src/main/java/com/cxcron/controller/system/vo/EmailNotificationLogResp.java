@@ -1,9 +1,11 @@
 package com.cxcron.controller.system.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Data
 @Schema(description = "邮件日志")
@@ -14,8 +16,19 @@ public class EmailNotificationLogResp {
     @Schema(description = "任务名称快照")
     private String taskName;
 
+    @Schema(description = "调度方式快照：CRON 或 RANDOM_DAILY")
+    private String scheduleType;
+
     @Schema(description = "Cron 表达式快照")
     private String cronExpression;
+
+    @Schema(description = "每日随机执行开始时间快照")
+    @JsonFormat(pattern = "HH:mm")
+    private LocalTime randomStartTime;
+
+    @Schema(description = "每日随机执行结束时间快照")
+    @JsonFormat(pattern = "HH:mm")
+    private LocalTime randomEndTime;
 
     @Schema(description = "邮件收件人")
     private String recipient;

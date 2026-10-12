@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 /**
  * 定时任务实体。
@@ -24,6 +25,21 @@ public class ScheduledTaskDO extends BaseDO {
      * Cron 表达式。 
      */
     private String cronExpression;
+
+    /**
+     * 任务调度方式：CRON 或 RANDOM_DAILY。
+     */
+    private String scheduleType;
+
+    /**
+     * 每日随机执行开始时间范围
+     */
+    private LocalTime randomStartTime;
+
+    /**
+     * 每日随机执行结束时间范围
+     */
+    private LocalTime randomEndTime;
 
     /** 
      * 上传脚本的存储路径。 

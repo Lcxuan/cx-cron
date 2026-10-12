@@ -20,6 +20,12 @@
         <template v-if="column.key === 'enabled'">
           <TaskStatusTag :enabled="record.enabled" />
         </template>
+        <template v-else-if="column.key === 'schedule'">
+          <span v-if="record.scheduleType === 'RANDOM_DAILY'">
+            每日随机 {{ record.randomStartTime }}–{{ record.randomEndTime }}
+          </span>
+          <span v-else>{{ record.cronExpression }}</span>
+        </template>
         <template v-else-if="column.key === 'lastScheduleStatus'">
           <a-tag v-if="record.lastScheduleStatus === 'SUCCESS'" color="success">成功</a-tag>
           <a-tag v-else-if="record.lastScheduleStatus === 'FAILED'" color="error">失败</a-tag>
@@ -89,12 +95,31 @@
         >
           <a-input v-model:value="form.name" />
         </a-form-item>
+        <a-form-item label="调度方式" name="scheduleType">
+          <a-select v-model:value="form.scheduleType">
+            <a-select-option value="CRON">Cron 定时</a-select-option>
+            <a-select-option value="RANDOM_DAILY">每日随机一次</a-select-option>
+          </a-select>
+        </a-form-item>
         <a-form-item
+          v-if="form.scheduleType === 'CRON'"
           label="Cron 表达式"
           name="cronExpression"
           :rules="[{ required: true, message: '请输入 Cron 表达式' }]"
         >
           <a-input v-model:value="form.cronExpression" placeholder="例如：0 0 * * * ?" />
+        </a-form-item>
+        <a-form-item
+          v-else
+          label="每日随机时间范围"
+          name="randomTimeRange"
+          :rules="[{ validator: validateRandomRange }]"
+        >
+          <a-space>
+            <a-input v-model:value="form.randomStartTime" type="time" step="60" />
+            <span>至</span>
+            <a-input v-model:value="form.randomEndTime" type="time" step="60" />
+          </a-space>
         </a-form-item>
         <a-form-item
           label="运行命令"
@@ -169,6 +194,7 @@ const actionLoadingId = ref<number>();
 const formRef = ref<FormInstance>();
 const form = reactive<TaskApi.TaskParams>({
   name: '',
+  scheduleType: 'CRON',
   cronExpression: '',
   runCommand: '',
   enabled: 1,
@@ -194,9 +220,22 @@ function handlePageChange(page: number, size: number) {
   void loadTasks();
 }
 
+function validateRandomRange() {
+  if (!form.randomStartTime || !form.randomEndTime) {
+    return Promise.reject(new Error('请选择随机执行的开始和结束时间'));
+  }
+  if (form.randomStartTime >= form.randomEndTime) {
+    return Promise.reject(new Error('结束时间必须晚于开始时间'));
+  }
+  return Promise.resolve();
+}
+
 function resetForm(task?: TaskApi.Task) {
   form.name = task?.name ?? '';
+  form.scheduleType = task?.scheduleType ?? 'CRON';
   form.cronExpression = task?.cronExpression ?? '';
+  form.randomStartTime = task?.randomStartTime ?? undefined;
+  form.randomEndTime = task?.randomEndTime ?? undefined;
   form.runCommand = task?.runCommand ?? '';
   form.enabled = task?.enabled ?? 1;
   form.emailNotificationPolicy = task?.emailNotificationPolicy ?? 'ALL';
