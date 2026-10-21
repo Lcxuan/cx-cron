@@ -144,7 +144,7 @@ export namespace TaskApi {
     scheduleType: 'CRON' | 'RANDOM_DAILY';
     randomStartTime: string | null;
     randomEndTime: string | null;
-    scriptPath: string;
+    scriptFilename: string | null;
     runCommand: string;
     enabled: 0 | 1;
     quartzJobName: string;
@@ -177,7 +177,7 @@ export namespace TaskApi {
     scheduledTaskId: number;
     triggerType: 'SCHEDULED' | 'MANUAL';
     idempotencyKey: string;
-    resultType: 'SUCCESS' | 'FAILED';
+    resultType: 'SUCCESS' | 'FAILED' | 'SKIPPED_CONCURRENT';
     summary: string | null;
     executionLog: string | null;
     quartzFireInstanceId: string | null;
@@ -228,6 +228,13 @@ export function updateTaskApi(taskId: number, data: TaskApi.TaskParams) {
   return requestClient.put<void>(`/client/tasks/${taskId}`, taskFormData(data), {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
+}
+
+/**
+ * 下载任务脚本。
+ */
+export function downloadTaskScriptApi(taskId: number) {
+  return requestClient.download<Blob>(`/client/tasks/${taskId}/script`, { responseReturn: 'body' });
 }
 
 /**

@@ -33,39 +33,45 @@ public class TaskExecutionServiceImpl implements TaskExecutionService {
 
     @Override
     public void execute(Long taskId, String triggerType, String quartzFireInstanceId) {
-        // 记录本次执行的开始时间，并使用任务 ID 获取分布式锁，避免同一任务并发执行。
         LocalDateTime startedTime = LocalDateTime.now();
         RLock lock = redissonClient.getLock("task-" + taskId);
         boolean locked = lock.tryLock();
-        String summary = "任务正在执行";
+        String summary = "任务正在执行中，本次跳过";
         String executionLog = "";
-        String resultType = TaskExecutionResultEnum.FAILED.name();
+        String resultType = TaskExecutionResultEnum.SKIPPED_CONCURRENT.name();
+        ScheduledTaskDO task = null;
         try {
-            // 查询任务配置；只有成功获取锁且脚本文件有效时才执行命令。
-            ScheduledTaskDO task = scheduledTaskMapper.selectById(taskId);
+            task = scheduledTaskMapper.selectById(taskId);
             if (locked) {
-                if (task == null || task.getScriptPath() == null || !Files.isRegularFile(Path.of(task.getScriptPath()))) {
-                    summary = "脚本不存在";
+                if (task == null || task.getScriptPath() == null
+                        || !Files.isRegularFile(Path.of(task.getScriptPath()))) {
+                    summary = task == null ? "任务不存在" : "脚本不存在";
                 } else {
-                    ScriptCommandExecutor.ExecutionResult result = scriptCommandExecutor.execute(task.getRunCommand(), Path.of(task.getScriptPath()));
+                    ScriptCommandExecutor.ExecutionResult result = scriptCommandExecutor.execute(
+                            task.getRunCommand(), Path.of(task.getScriptPath()));
                     summary = result.summary();
                     executionLog = result.executionLog();
                 }
-                resultType = "执行成功".equals(summary) ? TaskExecutionResultEnum.SUCCESS.name() : TaskExecutionResultEnum.FAILED.name();
+                resultType = "执行成功".equals(summary)
+                        ? TaskExecutionResultEnum.SUCCESS.name()
+                        : TaskExecutionResultEnum.FAILED.name();
             }
-            // 保存本次执行结果并更新任务最近执行状态。
-            ExecutionRecordDO record = saveRecord(taskId, triggerType, quartzFireInstanceId, startedTime, resultType, summary, executionLog);
+
+            // 无论脚本是否实际执行，都记录触发结果；并发跳过不会伪装成失败。
+            ExecutionRecordDO record = saveRecord(taskId, triggerType, quartzFireInstanceId,
+                    startedTime, resultType, summary, executionLog);
             updateLastSchedule(taskId, resultType, startedTime);
-            // 任务记录存在时通知邮件服务；通知异常不影响任务执行结果。
-            if (task != null) {
+            // 只有真正执行过脚本的结果才触发任务邮件通知。
+            if (locked && task != null) {
                 try {
                     emailNotificationService.notifyAfterExecution(task, record);
                 } catch (Exception ignored) {
                 }
             }
         } finally {
-            // 仅释放当前线程持有的锁。
-            if (locked && lock.isHeldByCurrentThread()) lock.unlock();
+            if (locked && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
         }
     }
 

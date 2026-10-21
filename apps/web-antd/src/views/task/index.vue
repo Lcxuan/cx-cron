@@ -29,6 +29,7 @@
         <template v-else-if="column.key === 'lastScheduleStatus'">
           <a-tag v-if="record.lastScheduleStatus === 'SUCCESS'" color="success">成功</a-tag>
           <a-tag v-else-if="record.lastScheduleStatus === 'FAILED'" color="error">失败</a-tag>
+          <a-tag v-else-if="record.lastScheduleStatus === 'SKIPPED_CONCURRENT'" color="warning">并发跳过</a-tag>
           <span v-else>-</span>
         </template>
         <template v-else-if="column.key === 'lastScheduleTime'">
@@ -134,9 +135,37 @@
           name="script"
           :rules="formMode === 'create' ? [{ required: true, message: '请上传脚本' }] : []"
         >
-          <a-upload :before-upload="selectScript" :max-count="1" @remove="form.script = undefined">
-            <a-button>选择脚本</a-button>
-          </a-upload>
+          <a-space direction="vertical" size="small" class="task-script-field">
+            <div
+              v-if="formMode === 'edit' && selectedTask?.scriptFilename && !form.script"
+              class="task-script-file"
+            >
+              <div class="task-script-file__info">
+                <span class="task-script-file__name">{{ selectedTask.scriptFilename }}</span>
+                <span class="task-script-file__hint">当前已上传的脚本</span>
+              </div>
+              <a-button
+                class="task-script-file__download"
+                :loading="isScriptDownloading"
+                @click="handleDownloadTaskScript"
+              >
+                <template #icon>
+                  <svg viewBox="0 0 24 24" aria-hidden="true" class="task-script-file__icon">
+                    <path d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v3h14v-3" />
+                  </svg>
+                </template>
+                下载
+              </a-button>
+            </div>
+            <a-upload
+              :before-upload="selectScript"
+              :file-list="scriptUploadFiles"
+              :max-count="1"
+              @remove="removeSelectedScript"
+            >
+              <a-button>选择脚本</a-button>
+            </a-upload>
+          </a-space>
         </a-form-item>
         <a-form-item label="邮件通知" name="emailNotificationPolicy">
           <a-radio-group v-model:value="form.emailNotificationPolicy">
@@ -163,12 +192,13 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { message, Modal } from 'ant-design-vue';
 import type { FormInstance, UploadProps } from 'ant-design-vue';
 import {
   createTaskApi,
   deleteTaskApi,
+  downloadTaskScriptApi,
   getTaskPageApi,
   triggerTaskApi,
   updateTaskApi,
@@ -191,6 +221,7 @@ const selectedTask = ref<TaskApi.Task>();
 const recordTask = ref<TaskApi.Task>();
 const isRecordsOpen = ref(false);
 const actionLoadingId = ref<number>();
+const isScriptDownloading = ref(false);
 const formRef = ref<FormInstance>();
 const form = reactive<TaskApi.TaskParams>({
   name: '',
@@ -200,6 +231,9 @@ const form = reactive<TaskApi.TaskParams>({
   enabled: 1,
   emailNotificationPolicy: 'ALL',
 });
+const scriptUploadFiles = computed(() =>
+  form.script ? [{ uid: 'selected-script', name: form.script.name, status: 'done' as const }] : [],
+);
 
 async function loadTasks() {
   isLoading.value = true;
@@ -261,6 +295,28 @@ const selectScript: UploadProps['beforeUpload'] = (file) => {
   form.script = file;
   return false;
 };
+
+function removeSelectedScript() {
+  form.script = undefined;
+}
+
+async function handleDownloadTaskScript() {
+  if (!selectedTask.value) return;
+  isScriptDownloading.value = true;
+  try {
+    const blob = await downloadTaskScriptApi(selectedTask.value.id);
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = selectedTask.value.scriptFilename || 'script';
+    link.click();
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    message.error(error instanceof Error ? error.message : '下载脚本失败');
+  } finally {
+    isScriptDownloading.value = false;
+  }
+}
 
 async function handleSubmit() {
   await formRef.value?.validate();
@@ -352,6 +408,66 @@ void loadTasks();
 </script>
 
 <style scoped>
+.task-script-field {
+  width: 100%;
+}
+
+.task-script-file {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.task-script-file__info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 2px;
+}
+
+.task-script-file__name {
+  overflow: hidden;
+  color: #1e293b;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-script-file__hint {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.task-script-file__download {
+  flex: none;
+  color: #2563eb;
+  border-color: #bfdbfe;
+  background: #fff;
+}
+
+.task-script-file__download:hover {
+  color: #1d4ed8;
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
+
+.task-script-file__icon {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
 .task-page {
   padding: 24px;
   background: #fff;

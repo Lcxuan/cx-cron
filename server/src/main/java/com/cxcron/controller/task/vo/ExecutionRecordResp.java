@@ -20,7 +20,7 @@ public class ExecutionRecordResp {
     @Schema(description = "执行请求的幂等键")
     private String idempotencyKey;
 
-    @Schema(description = "执行结果类型")
+    @Schema(description = "执行结果：SUCCESS-成功，FAILED-失败，SKIPPED_CONCURRENT-因已有执行实例而跳过")
     private String resultType;
 
     @Schema(description = "执行摘要")

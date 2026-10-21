@@ -13,8 +13,8 @@
           {{ record.triggerType === 'SCHEDULED' ? '定时' : '手动' }}
         </template>
         <template v-else-if="column.key === 'resultType'">
-          <a-tag :color="record.resultType === 'SUCCESS' ? 'success' : 'error'">
-            {{ record.resultType === 'SUCCESS' ? '成功' : '失败' }}
+          <a-tag :color="record.resultType === 'SUCCESS' ? 'success' : record.resultType === 'SKIPPED_CONCURRENT' ? 'warning' : 'error'">
+            {{ record.resultType === 'SUCCESS' ? '成功' : record.resultType === 'SKIPPED_CONCURRENT' ? '并发跳过' : '失败' }}
           </a-tag>
         </template>
         <template v-else-if="column.key === 'summary'">

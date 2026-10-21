@@ -8,6 +8,8 @@ import com.cxcron.controller.task.dto.TaskUpdateStatusReq;
 import com.cxcron.controller.task.vo.ExecutionRecordResp;
 import com.cxcron.controller.task.vo.ScheduledTaskResp;
 
+import java.nio.file.Path;
+
 public interface ScheduledTaskService {
 
     /**
@@ -64,4 +66,15 @@ public interface ScheduledTaskService {
      * @return 执行记录分页结果
      */
     PageResult<ExecutionRecordResp> getExecutionPage(Long taskId, TaskPageReq request);
+
+    /**
+     * 获取任务关联的脚本文件及原始文件名。
+     *
+     * @param taskId 任务 ID
+     * @return 脚本文件信息
+     */
+    ScriptFile getScriptFile(Long taskId);
+
+    record ScriptFile(Path path, String filename) {
+    }
 }

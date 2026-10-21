@@ -6,6 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
@@ -26,8 +27,8 @@ public class ScriptStorage {
         try {
             Path root = getRoot();
             Files.createDirectories(root);
-            String filename = UUID.randomUUID() + "-" + Path.of(script.getOriginalFilename()).getFileName();
-            Path target = root.resolve(filename).normalize();
+            String filename = UUID.randomUUID().toString();
+            Path target = root.resolve(filename);
             Files.copy(script.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
             return target.toString();
         } catch (IOException exception) {
@@ -48,6 +49,34 @@ public class ScriptStorage {
         } catch (IOException exception) {
             throw new IllegalStateException("脚本删除失败", exception);
         }
+    }
+
+    /**
+     * 解析已存储的脚本路径，确保指向存储目录中的文件
+     */
+    public Path resolve(String storedPath) {
+        if (storedPath == null || storedPath.isBlank()) throw new IllegalArgumentException("脚本不可用");
+        try {
+            Path root = getRoot().toRealPath();
+            Path stored = Path.of(storedPath);
+            Path script = (stored.isAbsolute() ? stored : root.resolve(stored)).toRealPath();
+            if (!script.startsWith(root) || !Files.isRegularFile(script)) {
+                throw new IllegalArgumentException("脚本不可用");
+            }
+            return script;
+        } catch (IOException | InvalidPathException exception) {
+            throw new IllegalArgumentException("脚本不可用");
+        }
+    }
+
+    /**
+     * 从上传文件名中提取不包含目录部分的原始文件名。
+     */
+    public String getOriginalFilename(String originalFilename) {
+        if (originalFilename == null || originalFilename.isBlank()) return "script";
+        String filename = originalFilename.replace('\\', '/');
+        filename = filename.substring(filename.lastIndexOf('/') + 1);
+        return filename.isBlank() ? "script" : filename;
     }
 
     /**

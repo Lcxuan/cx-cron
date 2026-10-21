@@ -13,6 +13,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -66,6 +72,17 @@ public class ScheduledTaskController {
     @GetMapping
     public Result<PageResult<ScheduledTaskResp>> getPage(@Valid TaskPageReq request) {
         return Result.success(scheduledTaskService.getPage(request));
+    }
+
+    @GetMapping("/{taskId}/script")
+    @Operation(summary = "下载任务脚本")
+    public ResponseEntity<Resource> downloadScript(@PathVariable("taskId") Long taskId) {
+        ScheduledTaskService.ScriptFile script = scheduledTaskService.getScriptFile(taskId);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentDisposition(ContentDisposition.attachment()
+                .filename(script.filename(), java.nio.charset.StandardCharsets.UTF_8).build());
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        return ResponseEntity.ok().headers(headers).body(new FileSystemResource(script.path()));
     }
 
     @GetMapping("/{taskId}/executions")

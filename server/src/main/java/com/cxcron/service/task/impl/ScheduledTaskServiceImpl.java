@@ -108,12 +108,19 @@ public class ScheduledTaskServiceImpl implements ScheduledTaskService {
         return ScheduledTaskConvert.INSTANCE.toExecutionPage(page);
     }
 
+    @Override
+    public ScheduledTaskService.ScriptFile getScriptFile(Long taskId) {
+        ScheduledTaskDO task = validateTask(taskId);
+        return new ScheduledTaskService.ScriptFile(scriptStorage.resolve(task.getScriptPath()), task.getScriptFilename());
+    }
+
     /**
      * 保存新脚本并删除旧脚本。
      */
     private void saveScript(ScheduledTaskDO task, org.springframework.web.multipart.MultipartFile script) {
         if (script == null || script.isEmpty()) return;
         String previous = task.getScriptPath();
+        task.setScriptFilename(scriptStorage.getOriginalFilename(script.getOriginalFilename()));
         task.setScriptPath(scriptStorage.save(script));
         scriptStorage.delete(previous);
     }

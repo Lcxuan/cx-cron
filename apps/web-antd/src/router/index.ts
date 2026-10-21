@@ -1,7 +1,7 @@
 import { Empty } from 'ant-design-vue';
 import { defineComponent, h } from 'vue';
 import type { RouteRecordRaw } from 'vue-router';
-import { createRouter, createWebHashHistory } from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
 import { installRouterGuard } from './guard';
 
 export const routes: RouteRecordRaw[] = [
@@ -47,7 +47,7 @@ export const routes: RouteRecordRaw[] = [
 ];
 
 export const router = createRouter({
-  history: createWebHashHistory(import.meta.env.VITE_BASE),
+  history: createWebHistory(import.meta.env.VITE_BASE),
   routes,
 });
 

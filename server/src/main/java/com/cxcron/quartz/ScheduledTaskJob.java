@@ -3,6 +3,7 @@ package com.cxcron.quartz;
 import com.cxcron.enums.TaskTriggerTypeEnum;
 import com.cxcron.service.execution.TaskExecutionService;
 import com.cxcron.service.quartz.QuartzTaskService;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -10,6 +11,7 @@ import org.quartz.JobExecutionContext;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
+@DisallowConcurrentExecution
 public class ScheduledTaskJob implements Job {
 
     public static final String TASK_ID_KEY = "scheduledTaskId";

@@ -30,8 +30,8 @@ public class ScheduledTaskResp {
     @JsonFormat(pattern = "HH:mm")
     private LocalTime randomEndTime;
 
-    @Schema(description = "任务脚本存储路径")
-    private String scriptPath;
+    @Schema(description = "任务脚本文件名")
+    private String scriptFilename;
 
     @Schema(description = "运行命令")
     private String runCommand;

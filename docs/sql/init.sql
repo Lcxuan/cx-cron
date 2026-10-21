@@ -87,6 +87,7 @@ CREATE TABLE scheduled_tasks (
     schedule_type varchar(20) NOT NULL DEFAULT 'CRON',
     random_start_time time,
     random_end_time time,
+    script_filename varchar(255),
     script_path varchar(512) NOT NULL,
     run_command varchar(512) NOT NULL,
     enabled smallint NOT NULL DEFAULT 1,
@@ -107,6 +108,8 @@ COMMENT ON COLUMN scheduled_tasks.cron_expression IS 'Cron 表达式';
 COMMENT ON COLUMN scheduled_tasks.schedule_type IS '调度方式：CRON、RANDOM_DAILY';
 COMMENT ON COLUMN scheduled_tasks.random_start_time IS '每日随机执行的开始时间';
 COMMENT ON COLUMN scheduled_tasks.random_end_time IS '每日随机执行的结束时间';
+COMMENT ON COLUMN scheduled_tasks.script_filename IS '上传脚本的原始文件名';
+COMMENT ON COLUMN scheduled_tasks.script_path IS '上传脚本的存储路径';
 COMMENT ON COLUMN scheduled_tasks.enabled IS '是否启用：0-暂停，1-启用';
 COMMENT ON COLUMN scheduled_tasks.quartz_job_name IS 'Quartz Job 名称';
 COMMENT ON COLUMN scheduled_tasks.last_schedule_status IS '最近调度状态';
@@ -141,7 +144,7 @@ COMMENT ON COLUMN execution_records.id IS '主键 ID';
 COMMENT ON COLUMN execution_records.scheduled_task_id IS '定时任务 ID';
 COMMENT ON COLUMN execution_records.trigger_type IS '触发方式：SCHEDULED-调度，MANUAL-手动';
 COMMENT ON COLUMN execution_records.idempotency_key IS '业务幂等键';
-COMMENT ON COLUMN execution_records.result_type IS '执行结果：SUCCESS-执行成功，FAILED-执行失败';
+COMMENT ON COLUMN execution_records.result_type IS '执行结果：SUCCESS-执行成功，FAILED-执行失败，SKIPPED_CONCURRENT-因已有执行实例而跳过';
 COMMENT ON COLUMN execution_records.summary IS '脱敏执行摘要';
 COMMENT ON COLUMN execution_records.execution_log IS '原始命令输出日志，可能包含敏感内容';
 COMMENT ON COLUMN execution_records.quartz_fire_instance_id IS 'Quartz 触发实例 ID';

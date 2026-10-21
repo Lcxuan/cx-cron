@@ -41,8 +41,13 @@ public class ScheduledTaskDO extends BaseDO {
      */
     private LocalTime randomEndTime;
 
-    /** 
-     * 上传脚本的存储路径。 
+    /**
+     * 上传脚本的原始文件名。
+     */
+    private String scriptFilename;
+
+    /**
+     * 上传脚本的存储路径。
      */
     private String scriptPath;
 
