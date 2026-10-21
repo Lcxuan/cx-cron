@@ -135,7 +135,16 @@ public class TaskEmailNotificationServiceImpl implements TaskEmailNotificationSe
             notification.setStatus(EmailNotificationStatusEnum.FAILED.name());
             notification.setErrorMessage("SMTP 邮件发送失败：" + e.getClass().getSimpleName());
         }
-        notificationMapper.updateById(notification);
+        try {
+            int updated = notificationMapper.updateById(notification);
+            if (updated == 0) {
+                log.error("邮件通知状态未更新: taskId={}, notificationId={}, status={}",
+                        task.getId(), notification.getId(), notification.getStatus());
+            }
+        } catch (Exception e) {
+            log.error("邮件已处理，但更新通知状态失败: taskId={}, notificationId={}, status={}",
+                    task.getId(), notification.getId(), notification.getStatus(), e);
+        }
     }
 
     /**
@@ -175,6 +184,13 @@ public class TaskEmailNotificationServiceImpl implements TaskEmailNotificationSe
                 + value + "</td></tr>";
     }
 
+    static void configureTimeouts(Properties properties, String protocol) {
+        String prefix = "mail." + protocol + ".";
+        properties.put(prefix + "connectiontimeout", "10000");
+        properties.put(prefix + "timeout", "10000");
+        properties.put(prefix + "writetimeout", "10000");
+    }
+
     /**
      * 使用全局 SMTP 配置发送 HTML 邮件。
      *
@@ -195,7 +211,8 @@ public class TaskEmailNotificationServiceImpl implements TaskEmailNotificationSe
         sender.setDefaultEncoding("UTF-8");
         Properties properties = sender.getJavaMailProperties();
         properties.put("mail." + protocol + ".auth", "true");
-        if ("smtp".equals(protocol)){
+        configureTimeouts(properties, protocol);
+        if ("smtp".equals(protocol)) {
             properties.put("mail.smtp.starttls.enable", "true");
         } else {
             properties.put("mail.smtps.ssl.enable", "true");
