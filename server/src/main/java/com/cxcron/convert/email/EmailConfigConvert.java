@@ -10,6 +10,12 @@ import org.mapstruct.factory.Mappers;
 public interface EmailConfigConvert {
     EmailConfigConvert INSTANCE = Mappers.getMapper(EmailConfigConvert.class);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createTime", ignore = true)
+    @Mapping(target = "createBy", ignore = true)
+    @Mapping(target = "updateTime", ignore = true)
+    @Mapping(target = "updateBy", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
     @Mapping(target = "smtpPasswordCiphertext", ignore = true)
     SystemEmailConfigDO toConfig(EmailConfigReq request);
 }

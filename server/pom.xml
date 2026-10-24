@@ -151,6 +151,8 @@
   </dependencies>
 
   <build>
+    <!-- 设置构建的 jar 包名 -->
+    <finalName>cx-cron</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -186,6 +188,13 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
         <version>${spring.boot.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>repackage</goal> <!-- 将引入的 jar 打入其中 -->
+            </goals>
+          </execution>
+        </executions>
         <configuration>
           <excludes>
             <exclude>

@@ -3,6 +3,7 @@ package com.cxcron.convert.auth;
 import com.cxcron.entity.AdminUserDO;
 import com.cxcron.controller.auth.vo.CurrentUserResp;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 /**
@@ -19,5 +20,6 @@ public interface AuthConvert {
      * @param user 管理员实体
      * @return 当前用户响应
      */
+    @Mapping(target = "menus", ignore = true)
     CurrentUserResp toCurrentUserResp(AdminUserDO user);
 }

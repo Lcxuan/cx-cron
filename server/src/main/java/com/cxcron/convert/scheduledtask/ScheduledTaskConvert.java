@@ -11,6 +11,7 @@ import com.cxcron.controller.task.vo.ScheduledTaskResp;
 import com.cxcron.entity.ExecutionRecordDO;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
 
@@ -26,7 +27,32 @@ public interface ScheduledTaskConvert {
 
     PageResult<ExecutionRecordResp> toExecutionPage(PageResult<ExecutionRecordDO> pageResult);
 
+    @Mapping(target = "notification", ignore = true)
+    ExecutionRecordResp toExecutionRecordResp(ExecutionRecordDO record);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createTime", ignore = true)
+    @Mapping(target = "createBy", ignore = true)
+    @Mapping(target = "updateTime", ignore = true)
+    @Mapping(target = "updateBy", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
+    @Mapping(target = "scriptFilename", ignore = true)
+    @Mapping(target = "scriptPath", ignore = true)
+    @Mapping(target = "quartzJobName", ignore = true)
+    @Mapping(target = "lastScheduleStatus", ignore = true)
+    @Mapping(target = "lastScheduleTime", ignore = true)
     ScheduledTaskDO toTask(TaskCreateReq request);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createTime", ignore = true)
+    @Mapping(target = "createBy", ignore = true)
+    @Mapping(target = "updateTime", ignore = true)
+    @Mapping(target = "updateBy", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
+    @Mapping(target = "scriptFilename", ignore = true)
+    @Mapping(target = "scriptPath", ignore = true)
+    @Mapping(target = "quartzJobName", ignore = true)
+    @Mapping(target = "lastScheduleStatus", ignore = true)
+    @Mapping(target = "lastScheduleTime", ignore = true)
     void updateTask(TaskUpdateReq request, @MappingTarget ScheduledTaskDO task);
 }
