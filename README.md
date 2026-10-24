@@ -107,6 +107,10 @@ pnpm typecheck
 pnpm build
 ```
 
+## 相关项目
+
+- [auto-script](https://github.com/Lcxuan/auto-script)：用于存放自动化脚本的开源项目。可以将其中的脚本上传到 cx-cron，配置任务并进行定时调度。
+
 ## 许可证
 
 本项目采用 [Apache License 2.0](./LICENSE) 许可证。
