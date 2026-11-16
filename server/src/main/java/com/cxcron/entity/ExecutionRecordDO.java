@@ -43,6 +43,16 @@ public class ExecutionRecordDO extends BaseDO {
     private String executionLog;
 
     /**
+     * 原始日志字节数。
+     */
+    private Long logSize;
+
+    /**
+     * 日志是否因超过上限被截断。
+     */
+    private Boolean logTruncated;
+
+    /**
      * Quartz 触发实例 ID。
      */
     private String quartzFireInstanceId;

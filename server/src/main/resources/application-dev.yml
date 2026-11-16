@@ -30,3 +30,6 @@ cxcron:
       refresh-timeout: 2592000
   email:
     encryption-key: ${CX_CRON_EMAIL_ENCRYPTIONKEY} # 邮件加密密钥
+  task:
+    execution:
+      max-log-bytes: 1048576 # 单次执行采集的最大日志字节数

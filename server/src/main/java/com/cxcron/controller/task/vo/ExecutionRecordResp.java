@@ -26,8 +26,14 @@ public class ExecutionRecordResp {
     @Schema(description = "执行摘要")
     private String summary;
 
-    @Schema(description = "原始命令输出日志，可能包含敏感内容")
+    @Schema(description = "命令输出日志，超过上限时截断，可能包含敏感内容")
     private String executionLog;
+
+    @Schema(description = "原始日志字节数")
+    private Long logSize;
+
+    @Schema(description = "日志是否因超过上限被截断")
+    private Boolean logTruncated;
 
     @Schema(description = "Quartz 调度触发实例 ID")
     private String quartzFireInstanceId;

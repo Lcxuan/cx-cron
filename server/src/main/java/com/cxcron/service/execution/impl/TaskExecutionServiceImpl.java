@@ -38,6 +38,8 @@ public class TaskExecutionServiceImpl implements TaskExecutionService {
         boolean locked = lock.tryLock();
         String summary = "任务正在执行中，本次跳过";
         String executionLog = "";
+        long logSize = 0L;
+        boolean logTruncated = false;
         String resultType = TaskExecutionResultEnum.SKIPPED_CONCURRENT.name();
         ScheduledTaskDO task = null;
         try {
@@ -51,6 +53,8 @@ public class TaskExecutionServiceImpl implements TaskExecutionService {
                             task.getRunCommand(), Path.of(task.getScriptPath()));
                     summary = result.summary();
                     executionLog = result.executionLog();
+                    logSize = result.logSize();
+                    logTruncated = result.logTruncated();
                 }
                 resultType = "执行成功".equals(summary)
                         ? TaskExecutionResultEnum.SUCCESS.name()
@@ -59,7 +63,7 @@ public class TaskExecutionServiceImpl implements TaskExecutionService {
 
             // 无论脚本是否实际执行，都记录触发结果；并发跳过不会伪装成失败。
             ExecutionRecordDO record = saveRecord(taskId, triggerType, quartzFireInstanceId,
-                    startedTime, resultType, summary, executionLog);
+                    startedTime, resultType, summary, executionLog, logSize, logTruncated);
             updateLastSchedule(taskId, resultType, startedTime);
             // 只有真正执行过脚本的结果才触发任务邮件通知。
             if (locked && task != null) {
@@ -84,17 +88,21 @@ public class TaskExecutionServiceImpl implements TaskExecutionService {
      * @param startedTime 执行开始时间
      * @param resultType 执行结果
      * @param summary 执行摘要
-     * @param executionLog 命令执行日志
+     * @param executionLog 命令执行日志（超过上限时已截断）
+     * @param logSize 原始日志字节数
+     * @param logTruncated 日志是否被截断
      * @return 已保存的执行记录
      */
     private ExecutionRecordDO saveRecord(Long taskId, String triggerType, String quartzFireInstanceId, LocalDateTime startedTime,
-                            String resultType, String summary, String executionLog) {
+                            String resultType, String summary, String executionLog, long logSize, boolean logTruncated) {
         ExecutionRecordDO record = new ExecutionRecordDO();
         record.setScheduledTaskId(taskId); record.setTriggerType(triggerType);
         record.setIdempotencyKey(taskId + "-" + startedTime.toLocalDate()); record.setQuartzFireInstanceId(quartzFireInstanceId);
         record.setResultType(resultType); 
         record.setSummary(summary); 
         record.setExecutionLog(executionLog); 
+        record.setLogSize(logSize);
+        record.setLogTruncated(logTruncated);
         record.setStartedTime(startedTime);
         record.setFinishedTime(LocalDateTime.now()); executionRecordMapper.insert(record);
         return record;

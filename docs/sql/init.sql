@@ -129,6 +129,8 @@ CREATE TABLE execution_records (
     result_type varchar(32) NOT NULL,
     summary varchar(512),
     execution_log text,
+    log_size bigint NOT NULL DEFAULT 0,
+    log_truncated boolean NOT NULL DEFAULT false,
     quartz_fire_instance_id varchar(128),
     started_time timestamp NOT NULL,
     finished_time timestamp,
@@ -146,7 +148,9 @@ COMMENT ON COLUMN execution_records.trigger_type IS '触发方式：SCHEDULED-�
 COMMENT ON COLUMN execution_records.idempotency_key IS '业务幂等键';
 COMMENT ON COLUMN execution_records.result_type IS '执行结果：SUCCESS-执行成功，FAILED-执行失败，SKIPPED_CONCURRENT-因已有执行实例而跳过';
 COMMENT ON COLUMN execution_records.summary IS '脱敏执行摘要';
-COMMENT ON COLUMN execution_records.execution_log IS '原始命令输出日志，可能包含敏感内容';
+COMMENT ON COLUMN execution_records.execution_log IS '命令输出日志，超过上限时截断，可能包含敏感内容';
+COMMENT ON COLUMN execution_records.log_size IS '日志原始字节数';
+COMMENT ON COLUMN execution_records.log_truncated IS '日志是否因超过上限被截断';
 COMMENT ON COLUMN execution_records.quartz_fire_instance_id IS 'Quartz 触发实例 ID';
 COMMENT ON COLUMN execution_records.started_time IS '开始执行时间';
 COMMENT ON COLUMN execution_records.finished_time IS '结束执行时间';
