@@ -107,6 +107,15 @@ pnpm typecheck
 pnpm build
 ```
 
+### 3. 默认管理员账号
+
+执行 [init.sql](./docs/sql/init.sql) 初始化数据库后，系统会创建默认管理员：
+
+- 用户名：`admin`
+- 密码：`123456`
+
+首次登录后请立即修改默认密码，生产环境部署前必须更换。
+
 ## 相关项目
 
 - [auto-script](https://github.com/Lcxuan/auto-script)：用于存放自动化脚本的开源项目。可以将其中的脚本上传到 cx-cron，配置任务并进行定时调度。

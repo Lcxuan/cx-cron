@@ -1,4 +1,4 @@
-package com.cxcron.common.ip;
+package com.cxcron.common.utils;
 
 import org.lionsoul.ip2region.service.Config;
 import org.lionsoul.ip2region.service.Ip2Region;

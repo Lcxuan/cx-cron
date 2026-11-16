@@ -1,6 +1,7 @@
 package com.cxcron.controller.auth;
 
 import com.cxcron.common.Result;
+import com.cxcron.common.utils.IpUtils;
 import com.cxcron.controller.auth.dto.LoginReq;
 import com.cxcron.controller.auth.dto.RefreshTokenReq;
 import com.cxcron.controller.auth.dto.UpdatePasswordReq;
@@ -11,6 +12,7 @@ import com.cxcron.service.auth.RsaCryptoService;
 import com.cxcron.service.token.TokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,13 +34,14 @@ public class AuthController {
     /**
      * 管理员登录
      *
-     * @param request 登录请求
+     * @param request         登录请求
+     * @param servletRequest  原始请求
      * @return 认证令牌
      */
     @Operation(summary = "管理员登录")
     @PostMapping("/login")
-    public Result<TokenResp> login(@Valid @RequestBody LoginReq request) {
-        return Result.success(authService.login(request));
+    public Result<TokenResp> login(@Valid @RequestBody LoginReq request, HttpServletRequest servletRequest) {
+        return Result.success(authService.login(request, IpUtils.getIp(servletRequest)));
     }
 
     @Operation(summary = "获取登录加密公钥")

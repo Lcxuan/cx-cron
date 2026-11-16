@@ -2,6 +2,7 @@ package com.cxcron.controller.auth.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,6 +20,7 @@ public class LoginReq {
      * 登录用户名。
      */
     @NotBlank(message = "用户名不能为空")
+    @Size(max = 64, message = "用户名长度不能超过 64 个字符")
     @Schema(description = "登录用户名", example = "admin", requiredMode = Schema.RequiredMode.REQUIRED)
     private String username;
 

@@ -10,10 +10,11 @@ public interface AuthService {
     /**
      * 管理员登录。
      *
-     * @param request 登录请求
+     * @param request  登录请求
+     * @param clientIp 客户端 IP
      * @return 认证令牌
      */
-    TokenResp login(LoginReq request);
+    TokenResp login(LoginReq request, String clientIp);
 
     /**
      * 修改当前管理员密码。

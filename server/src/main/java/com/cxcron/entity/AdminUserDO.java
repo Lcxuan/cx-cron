@@ -28,7 +28,7 @@ public class AdminUserDO extends BaseDO {
     private String nickname;
 
     /**
-     * 状态：0-启用，1-禁用。
+     * 状态：0-禁用，1-启用。
      */
     private Integer status;
 

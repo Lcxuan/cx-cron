@@ -21,6 +21,11 @@ public class PageParam {
     public static final long DEFAULT_PAGE_SIZE = 10L;
 
     /**
+     * 每页最大数量。
+     */
+    public static final long MAX_PAGE_SIZE = 100L;
+
+    /**
      * 页码，从 1 开始。
      */
     private Long pageNo = DEFAULT_PAGE_NO;
@@ -35,6 +40,8 @@ public class PageParam {
     }
 
     public void setPageSize(Long pageSize) {
-        this.pageSize = pageSize == null || pageSize < 1 ? DEFAULT_PAGE_SIZE : pageSize;
+        this.pageSize = pageSize == null || pageSize < 1
+                ? DEFAULT_PAGE_SIZE
+                : Math.min(pageSize, MAX_PAGE_SIZE);
     }
 }

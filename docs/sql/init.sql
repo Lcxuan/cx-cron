@@ -3,7 +3,7 @@ CREATE TABLE admin_users (
     username varchar(64) NOT NULL,
     password varchar(255) NOT NULL,
     nickname varchar(64) NOT NULL,
-    status smallint NOT NULL DEFAULT 0,
+    status smallint NOT NULL DEFAULT 1,
     last_login_time timestamp,
     create_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     create_by bigint,
@@ -17,7 +17,7 @@ COMMENT ON COLUMN admin_users.id IS '主键 ID';
 COMMENT ON COLUMN admin_users.username IS '登录用户名';
 COMMENT ON COLUMN admin_users.password IS '密码哈希';
 COMMENT ON COLUMN admin_users.nickname IS '显示名称';
-COMMENT ON COLUMN admin_users.status IS '状态：0-启用，1-禁用';
+COMMENT ON COLUMN admin_users.status IS '状态：0-禁用，1-启用';
 COMMENT ON COLUMN admin_users.last_login_time IS '最后登录时间';
 COMMENT ON COLUMN admin_users.create_time IS '创建时间';
 COMMENT ON COLUMN admin_users.create_by IS '创建人 ID';
@@ -26,7 +26,7 @@ COMMENT ON COLUMN admin_users.update_by IS '更新人 ID';
 COMMENT ON COLUMN admin_users.deleted IS '逻辑删除标记：0-未删除，1-已删除';
 
 INSERT INTO admin_users (id, username, password, nickname, status)
-VALUES (1, 'admin', '$2a$10$XZ4gi4F4F1rlQgFwHds0LOH/uTibvvrNYoaMF9sWxHgw0dpWnKu0m', '管理员', 0);
+VALUES (1, 'admin', '$2a$10$XZ4gi4F4F1rlQgFwHds0LOH/uTibvvrNYoaMF9sWxHgw0dpWnKu0m', '管理员', 1);
 
 CREATE TABLE refresh_tokens (
     id bigint NOT NULL,

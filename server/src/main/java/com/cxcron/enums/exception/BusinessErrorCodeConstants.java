@@ -10,6 +10,8 @@ public enum BusinessErrorCodeConstants implements ErrorCode {
     // 认证模块
     LOGIN_FAILED("1001", "账号或密码错误"),
     PASSWORD_INCORRECT("1002", "当前密码错误"),
+    ACCOUNT_DISABLED("1003", "账号已被禁用"),
+    LOGIN_LOCKED("1004", "登录失败次数过多，请稍后再试"),
 
     // 任务模块
     TASK_NOT_FOUND("2001", "任务不存在"),
